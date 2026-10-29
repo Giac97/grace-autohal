@@ -29,5 +29,8 @@ First version of the package, built from the `al_workflow.py` scripts.
 - tau advice after every exploration (also in `status`).
 - `status` shows the running stage's progress: DFT calculations / walkers done, running,
   pending, time per item and ETA; fit epochs.
+- `grace-al monitor`: live, read-only web page of a campaign (login node + SSH tunnel).
+- Clean interruption: SIGTERM stops every child process group (mpirun and its ranks too),
+  status `interrupted`, exit code 4; interrupted aims array tasks are run again.
 - SLURM: job scripts from the config, self-resubmission, DFT job-array chains, partition
   access check; `status` and `report` (plots, HTML).

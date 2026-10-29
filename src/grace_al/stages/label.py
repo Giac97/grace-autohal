@@ -80,9 +80,20 @@ def run_concurrent(labeler: Labeler, tasks: list[LabelTask], free: list[Slot]) -
         finally:
             pool_slots.put(slot)
 
+    from grace_al.utils import stop_all
+
     with ThreadPoolExecutor(len(free)) as ex:
-        for f in [ex.submit(one, t) for t in tasks]:
-            f.result()
+        futures = [ex.submit(one, t) for t in tasks]
+        try:
+            for f in futures:
+                f.result()
+        except BaseException:
+            # interrupted (or a failure): stop the running calculations, or leaving the
+            # pool would wait for all of them
+            for f in futures:
+                f.cancel()
+            stop_all()
+            raise
 
 
 def started(labeler: Labeler, task: LabelTask) -> bool:

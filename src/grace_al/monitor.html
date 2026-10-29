@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>grace-al monitor</title>
+<style>
+:root { color-scheme: light;
+  --surface:#fcfcfb; --card:#ffffff; --ink:#0b0b0b; --ink2:#52514e; --muted:#8a8984;
+  --line:#e4e3df; --blue:#2a78d6; --good:#0ca30c; --warning:#fab219; --critical:#d03b3b;
+  --pending:#cfcec8; --plotbg:#fcfcfb; }
+@media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) {
+  color-scheme: dark; --surface:#1a1a19; --card:#232322; --ink:#f0efec; --ink2:#c3c2b7;
+  --muted:#8f8e86; --line:#3a3a37; --blue:#3987e5; --pending:#55544f; } }
+:root[data-theme="dark"] { color-scheme: dark; --surface:#1a1a19; --card:#232322;
+  --ink:#f0efec; --ink2:#c3c2b7; --muted:#8f8e86; --line:#3a3a37; --blue:#3987e5;
+  --pending:#55544f; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--surface); color:var(--ink);
+  font:14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:1180px; margin:0 auto; padding:20px 16px 40px; }
+header { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 16px; margin-bottom:16px; }
+h1 { font-size:20px; margin:0; } h2 { font-size:15px; margin:0 0 10px; }
+.sub { color:var(--ink2); } .muted { color:var(--muted); font-size:12px; }
+.chip { display:inline-flex; align-items:center; gap:6px; padding:2px 10px; border-radius:999px;
+  border:1px solid var(--line); font-weight:600; }
+.dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(330px, 1fr)); gap:14px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px;
+  padding:14px 16px; min-width:0; }
+.wide { grid-column:1 / -1; }
+.bar { display:flex; gap:2px; height:14px; border-radius:4px; overflow:hidden; margin:8px 0 6px; }
+.bar span { height:100%; }
+.legend { display:flex; flex-wrap:wrap; gap:4px 14px; color:var(--ink2); font-size:13px; }
+.legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px;
+  vertical-align:-1px; }
+table { border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+.tablewrap { overflow-x:auto; }
+th, td { padding:4px 8px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap; }
+th { color:var(--ink2); font-weight:500; } th:first-child, td:first-child { text-align:left; }
+pre { margin:0; max-height:340px; overflow:auto; font-size:12px; line-height:1.35;
+  white-space:pre-wrap; word-break:break-word; color:var(--ink2); }
+.plots { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:12px; }
+.plots.wide2 { grid-template-columns:repeat(auto-fill, minmax(520px, 1fr)); }
+.plots img { width:100%; height:auto; display:block; border-radius:6px; background:var(--plotbg); }
+.msg { margin-top:8px; padding:8px 10px; border-left:3px solid var(--line); color:var(--ink2); }
+.msg.bad { border-color:var(--critical); } .msg.warn { border-color:var(--warning); }
+#err { display:none; color:var(--critical); font-weight:600; }
+ul.running { margin:6px 0 0; padding-left:18px; color:var(--ink2); font-size:13px; }
+</style></head>
+<body><main>
+<header>
+  <h1 id="title">grace-al</h1>
+  <span id="chip" class="chip"></span>
+  <span id="where" class="sub"></span>
+  <span class="muted" id="updated"></span>
+  <span id="err">monitor not reachable - retrying</span>
+</header>
+<div class="grid">
+  <section class="card" id="now"><h2>Now</h2><div id="nowbody" class="sub">-</div></section>
+  <section class="card" id="taucard"><h2>Exploration (tau)</h2><div id="tau" class="sub">-</div></section>
+  <section class="card wide"><h2>Rounds</h2><div class="tablewrap"><table id="rounds"></table></div></section>
+  <section class="card wide"><h2>Plots</h2><div class="plots" id="plots"></div></section>
+  <section class="card wide" id="paritycard"><h2>Parity: each round's model on its new DFT data</h2>
+    <div class="plots wide2" id="parity"></div></section>
+  <section class="card"><h2>Jobs</h2><div class="tablewrap"><table id="jobs"></table></div></section>
+  <section class="card"><h2 id="logtitle">Job log</h2><pre id="log">-</pre></section>
+</div>
+</main>
+<script>
+const REFRESH = __REFRESH__ * 1000;
+const STATUS = {  // status color + icon + label: never color alone
+  running: ["var(--blue)", "▶", "running"], finished: ["var(--good)", "✔", "finished"],
+  converged: ["var(--good)", "✔", "converged"],
+  waiting_for_labels: ["var(--warning)", "⏸", "waiting for labels"],
+  interrupted: ["var(--warning)", "⏸", "interrupted"], failed: ["var(--critical)", "✖", "failed"]};
+const $ = id => document.getElementById(id);
+const el = (tag, text, attrs) => { const e = document.createElement(tag);
+  if (text != null) e.textContent = text; Object.assign(e, attrs || {}); return e; };
+function dur(s) { if (s == null) return "–"; s = Math.round(s);
+  if (s < 90) return s + " s"; if (s < 5400) return Math.floor(s / 60) + " min";
+  return Math.floor(s / 3600) + " h " + String(Math.floor(s % 3600 / 60)).padStart(2, "0") + " min"; }
+function num(v) { if (v == null) return "–"; if (typeof v === "boolean") return v ? "yes" : "no";
+  if (typeof v === "number" && !Number.isInteger(v)) return v.toPrecision(3); return String(v); }
+function table(t, head, rows) { t.replaceChildren(); const h = el("tr");
+  head.forEach(x => h.append(el("th", x))); t.append(h);
+  rows.forEach(r => { const tr = el("tr"); r.forEach(x => tr.append(el("td", num(x)))); t.append(tr); }); }
+
+function renderNow(d) {
+  const b = $("nowbody"); b.replaceChildren(); const p = d.progress, s = d.state;
+  const since = s.updated ? (d.now - Date.parse(s.updated) / 1000) : null;
+  b.append(el("div", `round ${s.round}, ${s.stage || "–"}` +
+    (s.status === "running" && since != null ? ` · for ${dur(since)}` : "")));
+  if (s.message) b.append(el("div", s.message, {className: "msg " +
+    (s.status === "failed" ? "bad" : s.status === "interrupted" ? "warn" : "")}));
+  if (!p) return;
+  if (p.epochs_done != null) {
+    const frac = p.epochs_total ? p.epochs_done / p.epochs_total : 0;
+    const bar = el("div", null, {className: "bar"});
+    bar.append(el("span", null, {style: `flex:${frac};background:var(--good)`}),
+               el("span", null, {style: `flex:${1 - frac};background:var(--pending)`}));
+    b.append(el("div", `${p.what}: ${p.epochs_done} / ${p.epochs_total ?? "?"}`), bar,
+             el("div", `ETA ~${dur(p.eta_s)}`, {className: "muted"}));
+    return;
+  }
+  const parts = [["done", "var(--good)"], ["running", "var(--blue)"],
+                 ["failed", "var(--critical)"], ["pending", "var(--pending)"]];
+  const bar = el("div", null, {className: "bar", title: `${p.done}/${p.total} done`});
+  parts.forEach(([k, c]) => { if (p[k]) bar.append(el("span", null, {style: `flex:${p[k]};background:${c}`})); });
+  const leg = el("div", null, {className: "legend"});
+  parts.forEach(([k, c]) => { const s = el("span"); s.append(el("i", null, {style: `background:${c}`}),
+    document.createTextNode(`${k} ${p[k]}`)); leg.append(s); });
+  b.append(el("div", `${p.what}: ${p.done} of ${p.total} done, ${p.parallel} at a time`), bar, leg);
+  if (p.mean_s != null) b.append(el("div",
+    `time per item ${dur(p.mean_s)} (${dur(p.min_s)} – ${dur(p.max_s)}) · ETA ~${dur(p.eta_s)}`,
+    {className: "muted"}));
+  if (p.running_items.length) { const ul = el("ul", null, {className: "running"});
+    p.running_items.slice(0, 12).forEach(r => ul.append(el("li",
+      `${r.name}  ${r.detail || ""}  ${r.elapsed != null ? dur(r.elapsed) : ""}`)));
+    b.append(ul); }
+}
+
+function render(d) {
+  document.title = `${d.campaign} · grace-al`;
+  $("title").textContent = d.campaign;
+  const [c, icon, label] = STATUS[d.state.status] || ["var(--muted)", "•", d.state.status];
+  $("chip").replaceChildren(el("span", icon, {style: `color:${c}`}), el("span", label));
+  $("where").textContent = `round ${d.state.round} · ${d.state.stage || "–"}`;
+  $("updated").textContent = "updated " + new Date(d.now * 1000).toLocaleTimeString();
+  renderNow(d);
+  const t = $("tau"); t.replaceChildren();
+  if (d.tau) { t.append(el("div", `round ${d.tau.round}: ${d.tau.message}`, {className: "msg " +
+    (["increase", "decrease"].includes(d.tau.verdict) ? "warn" : "")})); }
+  else t.textContent = "no exploration yet";
+  table($("rounds"), ["round", "stages", "walkers", "collected", "rejected", "selected",
+    "natural set", "labeled", "failed", "val. F RMSE", "random F RMSE", "fit"],
+    d.rounds.map(r => [r.round, r.done.length, r.walkers, r.collected, r.rejected, r.selected,
+      r.natural_set, r.labeled, r.failed, r.val_force_rmse, r.val_by_strategy["random-all"], r.fit_done]));
+  const pl = $("plots"); pl.replaceChildren();
+  d.plots.forEach(n => pl.append(el("img", null, {src: `/plot/${n}.png?v=${d.plots_key}`, alt: n, loading: "lazy"})));
+  if (!d.plots.length) pl.append(el("div", "no plots yet (after the first stages)", {className: "sub"}));
+  const pa = $("parity"); pa.replaceChildren();
+  d.parity.slice().reverse().forEach(k => pa.append(el("img", null,
+    {src: `/parity/${k}.png?v=${d.plots_key}`, alt: `round ${k}`, loading: "lazy"})));
+  $("paritycard").style.display = d.parity.length ? "" : "none";
+  table($("jobs"), ["job", "kind", "state", "elapsed", "exit"],
+    d.jobs.slice().reverse().map(j => [j.id, j.kind, j.state || "?", j.elapsed || "", j.exitcode || ""]));
+  if (d.log) { $("logtitle").textContent = `Job log: ${d.log.file} (written ${dur(d.log.age_s)} ago)`;
+    const pre = $("log"); const atEnd = pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 4;
+    pre.textContent = d.log.lines.join("\n"); if (atEnd) pre.scrollTop = pre.scrollHeight; }
+}
+
+async function poll() {
+  try { const r = await fetch("/api/status", {cache: "no-store"});
+    if (!r.ok) throw new Error(r.status); render(await r.json()); $("err").style.display = "none"; }
+  catch (e) { $("err").style.display = "inline"; }
+  setTimeout(poll, REFRESH);
+}
+poll();
+</script>
+</body></html>

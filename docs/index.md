@@ -25,13 +25,14 @@ grace-al report my_campaign/config.yaml --html
 | `prepare` | login node: download models, run checks, list the partitions open to you |
 | `seeds` | build the initial structures from `system:` (preview them with `ase gui`) |
 | `check` | preflight: tools, models, seeds, aims, GPU |
-| `run` | run or resume the loop here (exit code 0 done, 3 waiting for labels, 1 error) |
+| `run` | run or resume the loop here (exit code 0 done, 3 waiting for labels, 4 interrupted, 1 error) |
 | `submit` | write the job script from the config and submit it |
 | `status` | round history and jobs |
 | `redo` | delete a round's outputs from a stage on, so they are recomputed |
 | `report` | plots and tables in `runs/report/` |
 | `validate` | parity of any model vs DFT for energies, forces, relative / adsorption / cohesive energies |
 | `export` | a round's model as a self-contained folder with a model card |
+| `monitor` | a live web page of the campaign (on the login node, through an SSH tunnel) |
 | `aims-run` | one aims calculation (used by the DFT job array) |
 
 Start with the [quickstart](quickstart.md); [concepts](concepts.md) explains what happens in a

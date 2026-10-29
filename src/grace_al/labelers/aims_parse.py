@@ -78,6 +78,8 @@ def _first_error(text: str) -> str:
 
 def categorize(out: str, err: str) -> tuple[str, str]:
     """(category, message) of an unfinished aims run from the text of aims.out and aims.err."""
+    if "grace-al: interrupted" in err:
+        return "crashed", "interrupted (SIGTERM: time limit or scancel); runs again on restart"
     for cat, pat in _OUT_ERRORS:
         m = pat.search(out)
         if m:

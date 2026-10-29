@@ -33,6 +33,13 @@ On a login node (it has internet; compute nodes usually don't):
    `grace-al submit --resubmit N+1` (at most `hpc.max_resubmit` times; never after
    `runs/FINISHED`).
 
+**Stopping cleanly.** On SIGTERM (the time-limit trap, `scancel`, Ctrl-C) `grace-al run`
+stops every child process group - HAL walkers, gracemaker, `grace_uq`, and `mpirun` with all
+its aims ranks - with SIGTERM, then SIGKILL after 10 s, records the status `interrupted`
+(exit code 4) and exits. The next run resumes: finished walkers and aims calculations are
+kept, an interrupted fit continues from its checkpoint, an interrupted aims calculation runs
+again (also when it was an array task: it is listed again, not counted as failed).
+
 `submit` refuses while a job of the campaign is queued or running (`--force` to override) and
 creates `logs/` (SLURM drops a job silently when its `--output` folder is missing).
 
@@ -69,6 +76,25 @@ walkers or DFT calculations done / running / failed / pending, the time per item
 max, from each item's `timing.json` or aims's own timing), the running calculations with
 their current SCF iteration, and an ETA (items left / items at once x mean time); for the fit,
 epochs done / planned.
+
+## Following a campaign live: `grace-al monitor`
+
+A read-only web page with everything `status` and `report` show, refreshed every 30 s:
+the running stage's progress (DFT calculations or walkers done / running / failed / pending,
+time per item, ETA, the SCF iteration of each running aims calculation), the rounds table,
+the report and parity plots, τ advice, the last jobs and the tail of the newest job log.
+
+```bash
+grace-al monitor my_campaign/config.yaml            # on the login node, grace env
+# it prints the tunnel to open on your computer, e.g.
+ssh -L 8765:localhost:8765 ka_pf5319@uc3n990         # or, via the login host:
+ssh -J ka_pf5319@uc3.scc.kit.edu -L 8765:localhost:8765 ka_pf5319@uc3n990
+# browser: http://localhost:8765
+```
+
+It reads the files the job writes (no hooks in the job), listens only on `localhost` and
+changes nothing; Ctrl-C stops it. Run it while you look rather than leaving it on the login
+node. `--port` picks another port, `--refresh` another interval.
 
 The report shows HAL frames, the natural set, validation and fit errors per round, the γ of
 the selected frames, aims failures by category, and the wall time per round with the share

@@ -107,7 +107,8 @@ grace-al redo --round 0 --from label
 Changing how a stage runs (`label.mode`, `explore.backend`, thresholds) is always allowed.
 
 `runs/state.json` holds the current round, stage and status (`running`,
-`waiting_for_labels`, `converged`, `finished`, `failed` + the message).
+`waiting_for_labels`, `interrupted` (stopped by SIGTERM; resumes), `converged`, `finished`,
+`failed` + the message).
 
 ## Slabs
 

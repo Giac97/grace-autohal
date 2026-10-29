@@ -121,5 +121,10 @@ Submitted job ids are stored in `state.json`.
 - Subprocesses go through `utils.run(cmd, cwd, env, log_file)`, never `os.system` or a shell.
 - Logging: `logging.getLogger("grace_al.<module>")`; the CLI configures rich output. Child
   process stdout goes to files (walker.log, aims.out, gracemaker.out, UQ/build.log).
-- Exit codes: 0 finished/converged, 1 error, 2 invalid config, 3 waiting for labels.
+- Exit codes: 0 finished/converged, 1 error, 2 invalid config, 3 waiting for labels,
+  4 interrupted.
+- Children run in their own process group through `utils.run` / `utils.wait_process`, so
+  `utils.Interrupted` (SIGTERM inside `utils.on_sigterm()`, a BaseException) stops whole
+  groups (mpirun + ranks). Don't start long-running children with bare `subprocess`.
+- `grace-al monitor` (`monitor.py` + `monitor.html`) only reads files; keep it read-only.
 - The version comes from git tags (hatch-vcs); the fallback is `0.1.0.dev0`.

@@ -19,6 +19,8 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from grace_al.utils import Interrupted, wait_process
+
 if TYPE_CHECKING:
     from grace_al.config.schema import Config
 
@@ -141,22 +143,42 @@ def run_aims(task_dir: Path, cfg: Config, np: int | None = None,
     timeout = cfg.aims.timeout if cfg.aims else None
     log.debug("$ %s   (in %s)", " ".join(cmd), task_dir)
     timing = start_timing(task_dir, ranks=np)
-    rc = 127
+    rc: int | str = 127
     try:
         with open(task_dir / "aims.out", "wb") as out, \
                 open(task_dir / "aims.err", "wb") as err:
             try:
-                rc = subprocess.run(cmd, cwd=task_dir, env=env, stdout=out, stderr=err,
-                                    preexec_fn=_unlimited_stack, timeout=timeout).returncode
+                rc = wait_process(cmd, timeout, cwd=task_dir, env=env, stdout=out,
+                                  stderr=err, preexec_fn=_unlimited_stack)
             except subprocess.TimeoutExpired:
                 err.write(f"\ngrace-al: timeout after {timeout} s (aims.timeout)\n".encode())
                 rc = -9
             except FileNotFoundError as e:   # mpirun not found
                 err.write(f"\ngrace-al: {e} (mpirun: command not found)\n".encode())
                 rc = 127
+            except (Interrupted, KeyboardInterrupt):
+                # aims was stopped (SIGTERM to its process group): rerun on the next start
+                err.write(f"\n{INTERRUPTED_MARK} (SIGTERM): rerun on restart\n".encode())
+                rc = INTERRUPTED
+                raise
     finally:
         end_timing(task_dir, timing, rc)
-    return rc
+    return int(rc)
+
+
+INTERRUPTED = "interrupted"          # timing.json exit_code of a stopped run
+INTERRUPTED_MARK = "grace-al: interrupted"
+
+
+def interrupted(task_dir: Path) -> bool:
+    """aims in task_dir was stopped by an interruption (not a failure of aims)."""
+    import json
+
+    p = task_dir / TIMING
+    try:
+        return p.exists() and json.loads(p.read_text()).get("exit_code") == INTERRUPTED
+    except json.JSONDecodeError:
+        return False
 
 
 TIMING = "timing.json"
@@ -175,7 +197,7 @@ def start_timing(d: Path, **info) -> dict:
     return t
 
 
-def end_timing(d: Path, t: dict, exit_code: int | None = None) -> None:
+def end_timing(d: Path, t: dict, exit_code: int | str | None = None) -> None:
     import json
     import time
 

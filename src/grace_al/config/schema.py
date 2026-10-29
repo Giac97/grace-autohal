@@ -228,6 +228,7 @@ class HpcConfig(Section):
     activate: str | None = None       # shell line that activates the Python env
     mpirun: str | None = None
     sbatch_extra: list[str] = []
+    login_host: str | None = None     # ssh host of the cluster (monitor's tunnel hint)
 
     @field_validator("env", mode="before")
     @classmethod

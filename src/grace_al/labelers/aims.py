@@ -111,8 +111,9 @@ class AimsLabeler:
                  f"failed (exit code {rc}, {self._failure(task).category})")
 
     def started(self, task: LabelTask) -> bool:
-        """aims was started on this task (array mode: don't list it again)."""
-        return (task.workdir / "aims.out").exists()
+        """aims ran on this task and was not interrupted (array mode: don't list it again;
+        failed runs are collected as failures, interrupted ones run again)."""
+        return (task.workdir / "aims.out").exists() and not launcher.interrupted(task.workdir)
 
     def is_finished(self, task: LabelTask) -> bool:
         return aims_parse.finished(aims_parse.read_text(task.workdir / "aims.out"))

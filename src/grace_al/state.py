@@ -20,7 +20,9 @@ from typing import Any, Literal
 
 log = logging.getLogger("grace_al.state")
 
-Status = Literal["running", "waiting_for_labels", "converged", "finished", "failed"]
+# interrupted: stopped by SIGTERM / Ctrl-C (time limit, scancel); the next run resumes
+Status = Literal["running", "waiting_for_labels", "converged", "finished", "failed",
+                 "interrupted"]
 
 # order within a round (seeds: round 0 only; validate in round 0: validation.include_round0)
 STAGES = ("seeds", "artifact", "explore", "select", "label", "validate", "finetune")

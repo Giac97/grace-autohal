@@ -25,3 +25,4 @@ hpc:
     I_MPI_PIN_CELL: core
   activate: eval "$(micromamba shell hook --shell bash)"; micromamba activate grace
   mpirun: mpirun
+  login_host: uc3.scc.kit.edu

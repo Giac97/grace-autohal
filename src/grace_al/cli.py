@@ -162,7 +162,7 @@ def run(
 ):
     """Run the active-learning loop (resumes where it stopped).
 
-    Exit codes: 0 finished or converged, 3 waiting for DFT labels, 1 error.
+    Exit codes: 0 finished or converged, 3 waiting for DFT labels, 4 interrupted, 1 error.
     """
     from grace_al.models import MissingModel
     from grace_al.stages.base import FingerprintMismatch, StageFailed
@@ -170,11 +170,17 @@ def run(
     from grace_al.workflow import run as run_workflow
 
     cfg = _load(config, site)
+    from grace_al.utils import Interrupted
+
     try:
         status = run_workflow(cfg, round_)
     except (FingerprintMismatch, StageFailed, MissingModel) as err:
         console.print(f"[red]{err}[/red]", highlight=False)
         raise typer.Exit(EXIT_ERROR) from None
+    except (Interrupted, KeyboardInterrupt):
+        console.print("[yellow]interrupted: child processes stopped; the next run "
+                      "resumes[/yellow]")
+        raise typer.Exit(EXIT_CODES["interrupted"]) from None
     console.print(f"status: {status}")
     raise typer.Exit(EXIT_CODES[status])
 
@@ -286,7 +292,7 @@ def status(config: ConfigArg, site: SiteOpt = None):
     cfg = _load(config, site)
     st = load_state(cfg.workdir)
     color = {"failed": "red", "converged": "green", "finished": "green",
-             "waiting_for_labels": "yellow"}.get(st.status, "cyan")
+             "waiting_for_labels": "yellow", "interrupted": "yellow"}.get(st.status, "cyan")
     console.print(f"round {st.round}, stage {st.stage or '-'}: [{color}]{st.status}[/{color}]"
                   f"  ({st.updated})", highlight=False)
     if st.message:
@@ -323,7 +329,7 @@ def _print_progress(cfg, st) -> None:
 
     from grace_al.progress import fmt_duration, stage_progress
 
-    if st.status not in ("running", "waiting_for_labels") or not st.stage:
+    if st.status not in ("running", "waiting_for_labels", "interrupted") or not st.stage:
         return
     p = stage_progress(cfg, st.round, st.stage)
     since = ""
@@ -352,16 +358,13 @@ def _print_progress(cfg, st) -> None:
 
 
 def _print_tau_advice(cfg) -> None:
-    from grace_al.state import read_marker, round_dir, rounds_on_disk
+    from grace_al.report import latest_tau_advice
 
-    for k in reversed(rounds_on_disk(cfg.workdir)):
-        m = read_marker(round_dir(cfg.workdir, k), "explore")
-        advice = (m or {}).get("summary", {}).get("tau_advice")
-        if advice:
-            style = "yellow" if advice["verdict"] in ("increase", "decrease") else None
-            console.print(f"\ntau (round {k}): {advice['message']}", style=style,
-                          highlight=False)
-            return
+    found = latest_tau_advice(cfg)
+    if found:
+        k, advice = found
+        style = "yellow" if advice["verdict"] in ("increase", "decrease") else None
+        console.print(f"\ntau (round {k}): {advice['message']}", style=style, highlight=False)
 
 
 @app.command()
@@ -475,6 +478,25 @@ def export_cmd(
     console.print(f"exported to {path} (see MODEL_CARD.md)", highlight=False)
 
 
+@app.command()
+def monitor(
+    config: ConfigArg,
+    port: Annotated[int, typer.Option(help="local port (reach it through an SSH tunnel)")]
+    = 8765,
+    refresh: Annotated[int, typer.Option(help="seconds between page updates")] = 30,
+    site: SiteOpt = None,
+):
+    """Follow the campaign live in a browser (read-only server on localhost)."""
+    from grace_al.monitor import serve
+
+    cfg = _load(config, site)
+    try:
+        serve(cfg, "127.0.0.1", port, refresh)
+    except OSError as err:
+        console.print(f"[red]cannot listen on port {port}: {err} (try --port)[/red]")
+        raise typer.Exit(EXIT_ERROR) from None
+
+
 @app.command("aims-run")
 def aims_run(
     config: ConfigArg,
@@ -484,6 +506,12 @@ def aims_run(
 ):
     """Run one prepared FHI-aims calculation (DFT job array); exit code 0 if it finished."""
     from grace_al.labelers.launcher import run_task
+    from grace_al.utils import Interrupted, on_sigterm
 
     cfg = _load(config, site)
-    raise typer.Exit(0 if run_task(cfg, task_dir.resolve()) == 0 else EXIT_ERROR)
+    try:
+        with on_sigterm():
+            rc = run_task(cfg, task_dir.resolve())
+    except (Interrupted, KeyboardInterrupt):
+        raise typer.Exit(4) from None
+    raise typer.Exit(0 if rc == 0 else EXIT_ERROR)

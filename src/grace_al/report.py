@@ -112,6 +112,16 @@ def round_rows(cfg: Config, gammas: bool = False) -> list[dict]:
     return rows
 
 
+def latest_tau_advice(cfg: Config) -> tuple[int, dict] | None:
+    """(round, tau advice) of the latest round that explored."""
+    for k in reversed(rounds_on_disk(cfg.workdir)):
+        m = read_marker(round_dir(cfg.workdir, k), "explore")
+        advice = (m or {}).get("summary", {}).get("tau_advice")
+        if advice:
+            return k, advice
+    return None
+
+
 # ---------------------------------------------------------------- plots
 def _axes(title: str, ylabel: str):
     import matplotlib

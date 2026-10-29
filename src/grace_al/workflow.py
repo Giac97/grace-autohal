@@ -10,7 +10,9 @@ One round (PLAN.md §5.1):
   finetune  fine-tune on everything labeled so far; artifact of the new model
 
 The loop stops when a stage waits for labels (exit code 3: resume later), when a stop
-criterion is met (natural set small, force RMSE below target) or after max_rounds.
+criterion is met (natural set small, force RMSE below target) or after max_rounds. SIGTERM
+(the job's time-limit trap, scancel) stops every child process and records `interrupted`
+(exit code 4); the next run resumes.
 """
 
 from __future__ import annotations
@@ -22,6 +24,7 @@ from typing import TYPE_CHECKING
 from grace_al import _tp, models
 from grace_al.stages.base import RoundContext, get_stage, run_stage
 from grace_al.state import STAGES, Status, round_dir, update_state
+from grace_al.utils import Interrupted, on_sigterm
 
 if TYPE_CHECKING:
     from grace_al.config.schema import Config
@@ -31,7 +34,7 @@ log = logging.getLogger("grace_al.workflow")
 
 # exit codes of `grace-al run` for the job scripts
 EXIT_CODES: dict[str, int] = {"finished": 0, "converged": 0, "running": 0,
-                              "waiting_for_labels": 3, "failed": 1}
+                              "waiting_for_labels": 3, "failed": 1, "interrupted": 4}
 
 
 def system_info(cfg: Config) -> SystemInfo:
@@ -100,13 +103,18 @@ def run(cfg: Config, only_round: int | None = None) -> Status:
     rounds = [only_round] if only_round is not None else list(range(max_rounds))
     k, result = rounds[0], "done"
     try:
-        run_seeds(cfg)
-        system = system_info(cfg)
-        for k in rounds:
-            result = run_round(cfg, k, system)
-            log.info("round %d: %s", k, result)
-            if result != "done":
-                break
+        with on_sigterm():
+            run_seeds(cfg)
+            system = system_info(cfg)
+            for k in rounds:
+                result = run_round(cfg, k, system)
+                log.info("round %d: %s", k, result)
+                if result != "done":
+                    break
+    except (Interrupted, KeyboardInterrupt) as err:
+        update_state(root, round=k, status="interrupted",
+                     message=f"stopped ({type(err).__name__}: {err}); the next run resumes")
+        raise
     except BaseException as err:
         update_state(root, round=k, status="failed", message=f"{type(err).__name__}: {err}")
         raise

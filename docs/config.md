@@ -202,3 +202,4 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 | `activate` | str \| None | `null` | shell line that activates the Python env |
 | `mpirun` | str \| None | `null` | MPI launcher of aims, may include options (srun --mpi=pmi2) |
 | `sbatch_extra` | list[str] | `[]` | extra #SBATCH lines, e.g. --constraint=... |
+| `login_host` | str \| None | `null` | ssh host of the cluster (monitor's tunnel hint) |

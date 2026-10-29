@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING
 
 from grace_al import _tp
 from grace_al.labelers.launcher import end_timing, start_timing
+from grace_al.utils import Interrupted, stop_process
 
 if TYPE_CHECKING:
     from grace_al.explore.plan import WalkerSpec
@@ -34,7 +35,7 @@ if TYPE_CHECKING:
 log = logging.getLogger("grace_al.explore")
 
 
-class Terminated(RuntimeError):
+class Terminated(Interrupted):
     """SIGTERM received; unfinished walkers are left to the next run."""
 
 
@@ -141,7 +142,8 @@ def run_pool(jobs: Sequence[Job], slots: list[dict[str, str]],
                 fh = open(job.log_file, "ab")
                 env = {**os.environ, **slots[slot], **job.env}
                 timing = start_timing(job.log_file.parent, walker=job.id, slot=slot)
-                proc = subprocess.Popen(job.cmd, stdout=fh, stderr=subprocess.STDOUT, env=env)
+                proc = subprocess.Popen(job.cmd, stdout=fh, stderr=subprocess.STDOUT, env=env,
+                                        start_new_session=True)
                 fh.close()
                 running[job.id] = (job, proc, slot, timing)
             for jid, (job, proc, slot, timing) in list(running.items()):
@@ -162,16 +164,19 @@ def run_pool(jobs: Sequence[Job], slots: list[dict[str, str]],
 
 
 def _terminate(procs: list[subprocess.Popen], grace: float) -> None:
+    """SIGTERM to every walker's process group at once, then SIGKILL after `grace`."""
     for p in procs:
         if p.poll() is None:
-            p.terminate()
+            try:
+                os.killpg(p.pid, signal.SIGTERM)
+            except (ProcessLookupError, PermissionError):
+                pass
     deadline = time.time() + grace
     for p in procs:
         try:
             p.wait(max(0.0, deadline - time.time()))
         except subprocess.TimeoutExpired:
-            p.kill()
-            p.wait()
+            stop_process(p, 0.0)
 
 
 def tail(path: Path, n: int = 15) -> str:
