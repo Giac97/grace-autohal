@@ -1,0 +1,21 @@
+site_name: grace-al
+site_description: Foundation-model-driven active learning for GRACE fine-tuning
+repo_url: ""
+theme:
+  name: material
+  features: [navigation.sections, content.code.copy]
+markdown_extensions:
+  - admonition
+  - tables
+  - toc: {permalink: true}
+  - pymdownx.superfences
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Concepts: concepts.md
+  - Configuration: config.md
+  - HPC: hpc.md
+  - Troubleshooting: troubleshooting.md
+  - Sites:
+      - bwUniCluster 3.0: sites/bwunicluster3.md
+  - Developer guide: developer.md

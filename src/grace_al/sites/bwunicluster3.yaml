@@ -1,0 +1,27 @@
+# bwUniCluster 3.0 (KIT). Merged under the user's config.yaml (`site: bwunicluster3`).
+# Partitions: check which ones your group may use with `grace-al prepare` (task 5) or
+#   sinfo -h -o %P | tr -d '*' | xargs -n1 scontrol show partition | grep -E 'PartitionName|AllowGroups|AllowAccounts'
+aims:
+  parameters:
+    # Intel oneAPI 2025 build: ELSI's default density-matrix builder gives a wrong
+    # density matrix -> "charge integration error". pdgemm is correct.
+    elsi_build_dm_method: pdgemm
+hpc:
+  partition_gpu: gpu_h100
+  partition_cpu: cpu
+  gres: gpu:1
+  ntasks: 32
+  mem: 128G
+  time: "48:00:00"
+  modules:
+    - compiler/intel/2025.0
+    - mpi/impi/2021.14-intel-2025.0
+    - numlib/mkl/2025.0
+  env:
+    # Intel MPI on the AMD nodes (shared node, fewer ranks than cores): shared-memory
+    # collectives and loose pinning give wrong results -> charge integration error
+    I_MPI_COLL_INTRANODE: pt2pt
+    I_MPI_PIN_DOMAIN: "1"
+    I_MPI_PIN_CELL: core
+  activate: eval "$(micromamba shell hook --shell bash)"; micromamba activate grace
+  mpirun: mpirun

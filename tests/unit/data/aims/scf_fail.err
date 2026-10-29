@@ -1,0 +1,78 @@
+[beavis:14448] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14449] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14451] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14450] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14448] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14449] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14450] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14451] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14448] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14449] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14451] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14450] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14449] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14448] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14450] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14451] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14448] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14449] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14451] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14450] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14448] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14449] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14451] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14450] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14449] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14448] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14451] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14450] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14448] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14449] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14451] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14450] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14448] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14449] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14450] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+[beavis:14451] osc_ucx_component.c:369  Error: OSC UCX component priority set inside component query failed 
+ 
+ *** scf_solver: SCF cycle not converged.
+ 
+Note: The following floating-point exceptions are signalling: IEEE_UNDERFLOW_FLAG IEEE_DENORMAL
+Note: The following floating-point exceptions are signalling: IEEE_UNDERFLOW_FLAG IEEE_DENORMAL
+Note: The following floating-point exceptions are signalling: IEEE_UNDERFLOW_FLAG IEEE_DENORMAL
+Note: The following floating-point exceptions are signalling: IEEE_UNDERFLOW_FLAG IEEE_DENORMAL

@@ -1,0 +1,55 @@
+# grace-al: bulk crystal (vacancies, substitutions). Paths are relative to this file.
+# Keys left out take their defaults (`grace-al check` prints problems; docs: config reference).
+schema_version: 1
+# site: bwunicluster3        # site profile: modules, MPI settings, aims quirks (grace-al init --site)
+workdir: runs
+foundation_model: GRACE-2L-SMAX-OMAT-medium   # full name; downloaded on a login node
+seeds: seeds.extxyz          # built from `system:` if it does not exist
+fm_rounds: 1
+
+system:
+  generator: bulk
+  bulk:
+    element: Al
+    crystalstructure: fcc    # fcc bcc hcp diamond rocksalt ...; null = ASE's reference structure
+    a: null                  # lattice constant in Å; null = ASE reference value
+    cubic: true
+    size: [2, 2, 2]          # supercell repeats
+    vacancies: [0, 1]        # vacancies per supercell (random sites)
+    substitutions: {}        # e.g. {Cu: 0.1}: 10 % of the sites become Cu (random)
+  initial:
+    strains: [0.98, 1.0, 1.02]   # isotropic
+    n_per_coverage: 2        # random variants per vacancy count and strain
+    fm_relax: false
+    n_rattle: 1
+    rattle_std: 0.05
+    seed: 0
+
+label:
+  labeler: aims              # aims | teacher (teacher_model: <FM>, dry run) | manual
+  mode: inline               # inline | concurrent | array (DFT as a CPU job array)
+
+# Keep fixed for the whole campaign: all rounds go into one training set.
+aims:
+  bin: $HOME/FHIaims-master/build/aims.x
+  np: 32
+  species_dir: /path/to/FHIaims/species_defaults/defaults_2020/light
+  kspacing: 0.2              # 1/Å incl. 2π (VASP KSPACING)
+
+explore:
+  ensembles: [nvt, npt]      # bulk: cell changes are fine
+  temperatures: [600, 1200]
+  tau: [0.25]
+  n_steps: 2000
+  walkers_per_setting: 4
+  backend: pool
+  walkers_per_gpu: 8
+  start_weights: {}
+
+select:
+  max_per_round: 100
+  n_random: 5
+
+convergence:
+  max_natural_set: 0
+  max_rounds: 5

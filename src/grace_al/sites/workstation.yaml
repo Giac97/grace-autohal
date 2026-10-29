@@ -1,0 +1,7 @@
+# Workstation with FHI-aims built against the system OpenMPI (Fedora: /usr/lib64/openmpi).
+# The grace env ships its own Intel MPI (I_MPI_ROOT, libfabric in LD_LIBRARY_PATH); aims
+# gets a clean PATH instead, and the launcher drops the conda MPI variables.
+hpc:
+  mpirun: /usr/lib64/openmpi/bin/mpirun
+  env:
+    PATH: /usr/lib64/openmpi/bin:/usr/local/bin:/usr/bin:/bin

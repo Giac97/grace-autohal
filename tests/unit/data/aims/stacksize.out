@@ -1,0 +1,127 @@
+------------------------------------------------------------
+          Invoking FHI-aims ...
+
+          When using FHI-aims, please cite the following reference:
+
+            Volker Blum, Ralf Gehrke, Felix Hanke, Paula Havu,
+            Ville Havu, Xinguo Ren, Karsten Reuter, and Matthias Scheffler,
+            'Ab Initio Molecular Simulations with Numeric Atom-Centered Orbitals',
+            Computer Physics Communications 180, 2175-2196 (2009)
+
+          In addition, many other developments in FHI-aims are likely important for
+          your particular application. If so, please cite them. A partial list of references
+          is written at the end of this file. Thank you for giving credit to the authors
+          of these developments.
+
+          For general information about FHI-aims please find us at
+
+            https://fhi-aims.org
+
+          Online tutorials can be found at
+
+            https://fhi-aims-club.gitlab.io/tutorials/tutorials-overview/
+
+          For any questions about FHI-aims, please visit our slack channel at
+
+            https://fhi-aims.slack.com
+
+          and our main development and support site at
+
+            https://aims-git.rz-berlin.mpg.de .
+
+          The latter site, in particular, has a wiki to collect information, as well
+          as an issue tracker to log discussions, suggest improvements, and report issues
+          or bugs. https://aims-git.rz-berlin.mpg.de is also the main development site
+          of the project and all new and updated code versions can be obtained there.
+          Please send an email to aims-coordinators@ms1p.org and we will add
+          you to these sites. They are for you and everyone is welcome there.
+
+------------------------------------------------------------
+
+
+
+  Date     :  20261029, Time     :  134921.704
+  Time zero on CPU 1             :   0.287866000000000E+00  s.
+  Internal wall clock time zero  :           562513761.704  s.
+
+  FHI-aims created a unique identifier for this run for later identification
+  aims_uuid : 0D9F6855-082E-452B-A6AA-610C2CC1E107
+
+  Build configuration of the current instance of FHI-aims
+  -------------------------------------------------------
+  FHI-aims version      : 260331
+  Commit number         : GITDIR-NOTFOUND
+  CMake host system     : Linux-6.19.14-108.fc42.x86_64
+  CMake version         : 3.31.11
+  OS Distribution       : Fedora Linux 42 (Workstation Edition)
+  Built on              : Intel(R) Core(TM) Ultra 5 225U
+  Fortran compiler      : /usr/lib64/openmpi/bin/mpif90 (GNU) version 15.2.1
+  Fortran compiler flags: -O3 -ffree-line-length-none -fallow-argument-mismatch
+  C compiler            : /usr/bin/gcc (GNU) version 15.2.1
+  C compiler flags      : -O3 -Wno-error=incompatible-pointer-types -std=gnu99
+  C++ compiler          : /usr/bin/g++ (GNU) version 15.2.1
+  C++ compiler flags    : -O3 -Wno-error=incompatible-pointer-types
+  HIP compiler          :
+  HIP compiler flags    :
+  HIP GPU arch          :
+  Using MPI
+  Using ScaLAPACK
+  Using LibXC
+  Using i-PI
+  Using RLSY
+  Using GREENX
+  Linking against: /usr/lib64/openmpi/lib/libscalapack.so
+                   /usr/lib64/libopenblas.so
+
+  Using        4 parallel tasks.
+  Task        0 on host beavis reporting.
+  Task        1 on host beavis reporting.
+  Task        2 on host beavis reporting.
+  Task        3 on host beavis reporting.
+
+  Obtaining array dimensions for all initial allocations:
+  
+  -----------------------------------------------------------------------
+  Parsing control.in (first pass over file, find array dimensions only).
+  The contents of control.in will be repeated verbatim below
+  unless switched off by setting 'verbatim_writeout .false.' .
+  in the first line of control.in .
+  -----------------------------------------------------------------------
+  
+  xc pbe
+  relativistic atomic_zora scalar
+  occupation_type methfessel-paxton 0.1 1
+  k_grid 6 6 6
+  compute_forces .true.
+  compute_analytical_stress .true.
+  sc_accuracy_rho 1e-6
+  ################################################################################
+  #
+  #  FHI-aims code project
+  #  VB, Fritz-Haber Institut, 2009
+  #
+  #  Suggested "light" defaults for Al atom (to be pasted into control.in file)
+  #  Be sure to double-check any results obtained with these settings for post-processing,
+  #  e.g., with the "tight" defaults and larger basis sets.
+  #
+  #  2020/09/08 Added f function to "light" after reinspection of Delta test outcomes.
+  #             This was done for all of Al-Cl and is a tricky decision since it makes
+  #             "light" calculations measurably more expensive for these elements.
+  #             Nevertheless, outcomes for P, S, Cl (and to some extent, Si) appear
+  #             to justify this choice.
+  #
+  ################################################################################
+    species        Al
+  #     global species definitions
+      nucleus             13
+      mass                26.9815386
+  #
+      l_hartree           4
+  #
+  [... synthetic fixture: header of ok_bulk.out + the stop message of check_stacksize.f90 ...]
+  Consistency checks for stacksize environment parameter are next.
+
+  | Maximum stacksize for task 0: 8.00 Mb
+  | Current stacksize for task 0: 8.00 Mb
+   *** Stacksize is not set to unlimited.
+ *** Current stacksize too low.  Stopping.

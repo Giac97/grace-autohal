@@ -1,0 +1,79 @@
+# grace-al: surface + adsorbate. Paths are relative to this file.
+# Keys left out take their defaults (`grace-al check` prints problems; docs: config reference).
+schema_version: 1
+site: bwunicluster3
+workdir: runs
+foundation_model: GRACE-2L-SMAX-OMAT-medium   # full name; downloaded on a login node
+seeds: seeds.extxyz          # built from `system:` if it does not exist
+fm_rounds: 1                 # rounds driven by the FM; later rounds by the last fine-tuned model
+
+system:
+  generator: surface
+  surface:
+    element: Pd
+    facet: fcc111            # fcc100 fcc110 fcc111 fcc211 bcc100 bcc110 bcc111 hcp0001 hcp10m10 diamond100 diamond111
+    size: [3, 3, 5]          # lateral repeats x, y and number of layers
+    vacuum: 15.0             # Å on each side of the slab
+    a: null                  # lattice constant in Å; null = ASE reference value
+    fix_layers: 2            # bottom layers fixed during the FM pre-relaxation
+  adsorbate:
+    species: CO              # element (O, H, ...) or ase.build.molecule name (CO, OH, H2O, NH3, ...)
+    sites: null              # null = all sites of the facet
+    height: 1.5              # Å above the top layer, before pre-relaxation
+    min_distance: 2.5        # Å between adsorbates at higher coverage
+  initial:
+    strains: [0.98, 1.0, 1.02]
+    coverages: [2, 3]
+    n_per_coverage: 2
+    fm_relax: true
+    fmax: 0.05
+    relax_steps: 100
+    n_rattle: 1
+    rattle_std: 0.05
+    seed: 0
+
+label:
+  labeler: aims              # aims | teacher (teacher_model: <FM>, dry run) | manual
+  mode: inline               # inline | concurrent | array (DFT as a CPU job array)
+
+# Keep fixed for the whole campaign: all rounds go into one training set.
+aims:
+  bin: $HOME/FHIaims-master/build/aims.x
+  np: 32                     # used when AIMS_NP / SLURM_NTASKS are not set
+  species_dir: /path/to/FHIaims/species_defaults/defaults_2020/light
+  kspacing: 0.2              # 1/Å incl. 2π (VASP KSPACING); k_z = 1 for slabs
+  parameters:                # on top of the defaults (pbe, atomic_zora, m-p 0.1, dipole for slabs, ...)
+    occupation_type: methfessel-paxton 0.1 1
+
+artifact:
+  rp_dim_round0: 32
+  rp_dim: 128
+  n_clusters: [1, 2, 4, 8, 16]
+
+explore:
+  ensembles: [nvt]           # slabs: nvt only (the others rescale the cell including the vacuum)
+  temperatures: [800, 1200]
+  tau: [0.25]
+  n_steps: 2000
+  walkers_per_setting: 4
+  backend: pool              # pool: walkers as subprocesses sharing the GPU; inproc: one by one
+  walkers_per_gpu: 8
+  start_weights: {clean: 0.2}  # at most 20 % of the walkers start from a clean slab
+  calibrate: false           # true: pick tau in round 0 from short walkers (calibrate_taus)
+
+select:
+  max_per_round: 100
+  n_random: 5
+
+finetune:
+  frozen: true
+  reference_energy: auto     # aims totals are all-electron
+  learning_rate: 1.0e-3
+  target_total_updates: 10000
+  batch_size: 16
+  test_size: 0.1
+
+convergence:
+  max_natural_set: 0
+  force_rmse: null
+  max_rounds: 5

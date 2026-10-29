@@ -1,0 +1,23 @@
+#!/bin/bash
+# grace-al FHI-aims job array (round {{ round }}, {{ n_tasks }} calculations), written by
+# `grace-al submit` - edit the config, not this file. One aims run per array task.
+#SBATCH --job-name={{ job_name }}-dft
+{% if hpc.partition_cpu %}#SBATCH --partition={{ hpc.partition_cpu }}
+{% endif %}{% if hpc.account %}#SBATCH --account={{ hpc.account }}
+{% endif %}#SBATCH --nodes=1
+#SBATCH --ntasks={{ ranks }}
+#SBATCH --cpus-per-task=1
+#SBATCH --time={{ hpc.label_time }}
+#SBATCH --array=0-{{ n_tasks - 1 }}%{{ hpc.array_max_parallel }}
+#SBATCH --output={{ logs }}/aims_%A_%a.log
+{% for line in hpc.sbatch_extra %}#SBATCH {{ line }}
+{% endfor %}
+cd "{{ home }}" || exit 1
+module purge
+{% if hpc.modules %}module load {{ hpc.modules | join(" ") }}
+{% endif %}{% for k, v in hpc.env.items() %}export {{ k }}={{ v | shell_quote }}
+{% endfor %}
+# no Python env activation: the env's python by its absolute path, aims in the module env
+TASK=$(sed -n "$((SLURM_ARRAY_TASK_ID + 1))p" "{{ tasks_file }}")
+echo "$(date): array task $SLURM_ARRAY_TASK_ID: $TASK on $(hostname)"
+"{{ python }}" -m grace_al aims-run "{{ config }}" "$TASK"

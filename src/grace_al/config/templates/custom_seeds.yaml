@@ -1,0 +1,28 @@
+# grace-al: your own seed structures. Paths are relative to this file.
+schema_version: 1
+# site: bwunicluster3
+workdir: runs
+foundation_model: GRACE-2L-SMAX-OMAT-medium
+seeds: seeds.extxyz          # 3D-periodic frames (slabs: vacuum along z, pbc = True)
+fm_rounds: 1
+
+label:
+  labeler: aims
+  mode: inline
+
+aims:
+  bin: $HOME/FHIaims-master/build/aims.x
+  np: 32
+  species_dir: /path/to/FHIaims/species_defaults/defaults_2020/light
+  kspacing: 0.2
+
+explore:
+  ensembles: [nvt]           # bulk: nvt_ramp / npt also possible; slabs: nvt only
+  temperatures: [800, 1200]
+  tau: [0.25]
+  n_steps: 2000
+  walkers_per_setting: 4
+  backend: pool
+
+convergence:
+  max_rounds: 5

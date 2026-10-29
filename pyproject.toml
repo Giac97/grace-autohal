@@ -1,0 +1,77 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "grace-al"
+dynamic = ["version"]
+description = "Foundation-model-driven active learning for GRACE fine-tuning (HAL + CALM + FHI-aims)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "TBD" }
+authors = [{ name = "Giacomo Becatti", email = "giacomo.becatti@kit.edu" }]
+dependencies = [
+    "tensorpotential>=0.6.2,<0.7",
+    "ase>=3.23",
+    "numpy",
+    "pandas>=2,<3",
+    "pyyaml",
+    "pydantic>=2",
+    "jinja2",
+    "typer",
+    "rich",
+    "matplotlib",
+    "packaging",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "mypy"]
+docs = ["mkdocs-material", "mkdocstrings[python]"]
+
+[project.scripts]
+grace-al = "grace_al.cli:app"
+
+[project.entry-points."grace_al.systems"]
+surface = "grace_al.systems.surface:SurfaceGenerator"
+bulk = "grace_al.systems.bulk:BulkGenerator"
+file = "grace_al.systems.from_file:FileGenerator"
+
+[project.entry-points."grace_al.labelers"]
+aims = "grace_al.labelers.aims:AimsLabeler"
+teacher = "grace_al.labelers.teacher:TeacherLabeler"
+manual = "grace_al.labelers.manual:ManualLabeler"
+
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.1.0.dev0"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/grace_al"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E731"]  # small lambdas, as in the original scripts
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not grace and not aims and not slurm'"
+markers = [
+    "grace: needs tensorpotential + a GRACE foundation model (CPU or GPU)",
+    "aims: needs an FHI-aims binary and species files",
+    "slurm: needs sbatch",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+files = ["src/grace_al/config", "src/grace_al/stages", "src/grace_al/labelers",
+         "src/grace_al/systems", "src/grace_al/_tp.py", "src/grace_al/preflight.py",
+         "src/grace_al/cli.py", "src/grace_al/workflow.py", "src/grace_al/state.py",
+         "src/grace_al/data.py", "src/grace_al/models.py",
+         "src/grace_al/preflight_aims.py", "src/grace_al/explore",
+         "src/grace_al/preflight_explore.py", "src/grace_al/hpc",
+         "src/grace_al/report.py"]

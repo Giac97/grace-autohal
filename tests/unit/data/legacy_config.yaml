@@ -1,0 +1,82 @@
+# Foundation-model-driven active learning (al_workflow.py). Paths: relative to this file.
+workdir: runs
+foundation_model: GRACE-2L-SMAX-OMAT-medium   # full name; download on a login node (README)
+seeds: seeds.extxyz        # built from `system:` below if it does not exist
+fm_rounds: 1               # rounds driven by the FM; later rounds by the previous fine-tuned model
+max_rounds: 5
+
+# Surface + adsorbate -> initial dataset (build_seeds.py). Remove this section to use
+# your own seeds file instead.
+system:
+  surface:
+    element: Pd
+    facet: fcc111          # fcc100 fcc110 fcc111 fcc211 bcc100 bcc110 bcc111 hcp0001 hcp10m10 diamond100 diamond111
+    size: [3, 3, 5]        # lateral repeats x, y and number of layers
+    vacuum: 15.0           # Å on each side of the slab
+    a: null                # lattice constant in Å; null = ASE reference value (Pd: 3.89)
+    fix_layers: 2          # bottom layers fixed during the FM pre-relaxation
+  adsorbate:
+    species: CO             # element (O, H, ...) or ase.build.molecule name (CO, OH, H2O, NH3, ...)
+    sites: null            # null = all sites of the facet (fcc111: ontop, bridge, fcc, hcp)
+    height: 1.5            # Å above the top layer, before pre-relaxation
+    min_distance: 2.5      # Å, between adsorbates at higher coverage
+    # bind_index: 0        # binding atom of a molecule (default: least electronegative heavy atom, CO -> C)
+  initial:
+    strains: [0.98, 1.0, 1.02]   # lateral strains: clean slab and one adsorbate per site
+    coverages: [2, 3]            # adsorbates per cell in the random multi-adsorbate configs
+    n_per_coverage: 2
+    fm_relax: true               # pre-relax every config with the FM (bottom layers fixed)
+    fmax: 0.05
+    relax_steps: 100
+    n_rattle: 1                  # extra randomly displaced copies per config
+    rattle_std: 0.05             # Å
+    seed: 0
+
+# aims: FHI-aims (settings below); fm:<MODEL>: teacher model (dry run);
+# module:function (frames, workdir) -> labeled frames; null: stop and compute
+# runs/round_XX/to_label.extxyz yourself.
+labeler: aims
+
+# Keep these fixed for the whole campaign: all rounds go into one training set.
+aims:
+  command: run_aims.sh     # launcher; MPI ranks = AIMS_NP (= SLURM_NTASKS in the job)
+  np: 8                    # only used when AIMS_NP is not set
+  species_dir: /home/ka/ka_scc/ka_pf5319/FHIaims-master/species_defaults/defaults_2020/light
+  kspacing: 0.2            # 1/Å incl. 2π (VASP KSPACING); k_z = 1 when vacuum > 6 Å along z
+  parameters:
+    xc: pbe
+    relativistic: atomic_zora scalar
+    occupation_type: methfessel-paxton 0.1 1
+    spin: none
+    use_dipole_correction: true   # slabs only; aims finds the vacuum level itself
+    sc_accuracy_rho: 1.0e-6
+    sc_iter_limit: 200
+    # bwUniCluster (Intel oneAPI 2025 build): ELSI's default DM builder (ELPA A^T*A)
+    # returns a wrong density matrix -> charge integration error. pdgemm is correct.
+    elsi_build_dm_method: pdgemm
+
+artifact:
+  rp_dim_round0: 32        # rp_dims are lowered automatically when an element has few atoms
+  rp_dim: 128
+  n_clusters: [1, 2, 4, 8, 16]
+
+hal:
+  ensembles: [nvt]         # slab: nvt only (nvt_ramp/npt rescale the cell including the vacuum)
+  temperatures: [800, 1200]
+  tau: [0.25]              # scan first (see "Choosing tau" in the GRACE docs)
+  n_steps: 2000
+  repeats: 4               # walkers per (ensemble, T, tau); walker r starts from (shuffled) seed r
+  parallel_cli: true       # GPU node: grace_uq hal --repeats (walkers in parallel)
+  walkers_per_gpu: 8
+
+select:
+  max_per_round: 100       # cap on calm-greedy's natural set
+  n_random: 5              # extra random frames, e.g. for validation
+
+finetune:
+  frozen: true             # train only the reducing_ weights
+  reference_energy: auto   # per-element E0 fit (aims totals are all-electron)
+  learning_rate: 1.0e-3
+  target_total_updates: 10000
+  batch_size: 16
+  test_size: 0.1

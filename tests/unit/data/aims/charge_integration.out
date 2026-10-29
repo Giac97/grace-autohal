@@ -1,0 +1,359 @@
+[0] MPI startup(): Intel(R) MPI Library, Version 2021.14  Build 20241121 (id: e7829d6)
+[0] MPI startup(): Copyright (C) 2003-2024 Intel Corporation.  All rights reserved.
+[0] MPI startup(): library kind: release
+[0] MPI startup(): libfabric version: 1.21.0-impi
+[0] MPI startup(): libfabric provider: mlx
+[0] MPI startup(): Load tuning file: "/software/bwhpc/common/toolkit/Intel_OneAPI/mpi/2021.14/opt/mpi/etc/tuning_generic_shm-ofi.dat"
+[0] MPI startup(): Number of NICs:  1 
+[0] MPI startup(): ===== NIC pinning on uc3n104.localdomain =====
+[0] MPI startup(): Rank    Thread id  Pin nic
+[0] MPI startup(): 0       0          mlx
+[0] MPI startup(): 1       0          mlx
+[0] MPI startup(): 2       0          mlx
+[0] MPI startup(): 3       0          mlx
+[0] MPI startup(): 4       0          mlx
+[0] MPI startup(): 5       0          mlx
+[0] MPI startup(): 6       0          mlx
+[0] MPI startup(): 7       0          mlx
+[0] MPI startup(): 8       0          mlx
+[0] MPI startup(): 9       0          mlx
+[0] MPI startup(): 10      0          mlx
+[0] MPI startup(): 11      0          mlx
+[0] MPI startup(): 12      0          mlx
+[0] MPI startup(): 13      0          mlx
+[0] MPI startup(): 14      0          mlx
+[0] MPI startup(): 15      0          mlx
+[0] MPI startup(): 16      0          mlx
+[0] MPI startup(): 17      0          mlx
+[0] MPI startup(): 18      0          mlx
+[0] MPI startup(): 19      0          mlx
+[0] MPI startup(): 20      0          mlx
+[0] MPI startup(): 21      0          mlx
+[0] MPI startup(): 22      0          mlx
+[0] MPI startup(): 23      0          mlx
+[0] MPI startup(): 24      0          mlx
+[0] MPI startup(): 25      0          mlx
+[0] MPI startup(): 26      0          mlx
+[0] MPI startup(): 27      0          mlx
+[0] MPI startup(): 28      0          mlx
+[0] MPI startup(): 29      0          mlx
+[0] MPI startup(): 30      0          mlx
+[0] MPI startup(): 31      0          mlx
+[0] MPI startup(): ===== CPU pinning =====
+[0] MPI startup(): Rank    Pid      Node name            Pin cpu
+[0] MPI startup(): 0       1378489  uc3n104.localdomain  {3}
+[0] MPI startup(): 1       1378490  uc3n104.localdomain  {5}
+[0] MPI startup(): 2       1378491  uc3n104.localdomain  {6}
+[0] MPI startup(): 3       1378492  uc3n104.localdomain  {7}
+[0] MPI startup(): 4       1378493  uc3n104.localdomain  {11}
+[0] MPI startup(): 5       1378494  uc3n104.localdomain  {48}
+[0] MPI startup(): 6       1378495  uc3n104.localdomain  {49}
+[0] MPI startup(): 7       1378496  uc3n104.localdomain  {50}
+[0] MPI startup(): 8       1378497  uc3n104.localdomain  {51}
+[0] MPI startup(): 9       1378498  uc3n104.localdomain  {52}
+[0] MPI startup(): 10      1378499  uc3n104.localdomain  {53}
+[0] MPI startup(): 11      1378500  uc3n104.localdomain  {54}
+[0] MPI startup(): 12      1378501  uc3n104.localdomain  {55}
+[0] MPI startup(): 13      1378502  uc3n104.localdomain  {56}
+[0] MPI startup(): 14      1378503  uc3n104.localdomain  {57}
+[0] MPI startup(): 15      1378504  uc3n104.localdomain  {58}
+[0] MPI startup(): 16      1378505  uc3n104.localdomain  {59}
+[0] MPI startup(): 17      1378506  uc3n104.localdomain  {12}
+[0] MPI startup(): 18      1378507  uc3n104.localdomain  {13}
+[0] MPI startup(): 19      1378508  uc3n104.localdomain  {14}
+[0] MPI startup(): 20      1378509  uc3n104.localdomain  {15}
+[0] MPI startup(): 21      1378510  uc3n104.localdomain  {16}
+[0] MPI startup(): 22      1378511  uc3n104.localdomain  {17}
+[0] MPI startup(): 23      1378512  uc3n104.localdomain  {18}
+[0] MPI startup(): 24      1378513  uc3n104.localdomain  {19}
+[0] MPI startup(): 25      1378514  uc3n104.localdomain  {20}
+[0] MPI startup(): 26      1378515  uc3n104.localdomain  {21}
+[0] MPI startup(): 27      1378516  uc3n104.localdomain  {22}
+[0] MPI startup(): 28      1378517  uc3n104.localdomain  {60}
+[0] MPI startup(): 29      1378518  uc3n104.localdomain  {61}
+[0] MPI startup(): 30      1378519  uc3n104.localdomain  {62}
+[0] MPI startup(): 31      1378520  uc3n104.localdomain  {63}
+[0] MPI startup(): I_MPI_CC=/software/bwhpc/common/toolkit/Intel_OneAPI/compiler/2025.0/bin/icx
+[0] MPI startup(): I_MPI_CXX=/software/bwhpc/common/toolkit/Intel_OneAPI/compiler/2025.0/bin/icpx
+[0] MPI startup(): I_MPI_FC=/software/bwhpc/common/toolkit/Intel_OneAPI/compiler/2025.0/bin/ifx
+[0] MPI startup(): I_MPI_F90=/software/bwhpc/common/toolkit/Intel_OneAPI/compiler/2025.0/bin/ifx
+[0] MPI startup(): I_MPI_F77=/software/bwhpc/common/toolkit/Intel_OneAPI/compiler/2025.0/bin/ifx
+[0] MPI startup(): I_MPI_ROOT=/software/bwhpc/common/toolkit/Intel_OneAPI/mpi/2021.14
+[0] MPI startup(): I_MPI_MPIRUN=mpirun
+[0] MPI startup(): I_MPI_BIND_WIN_ALLOCATE=localalloc
+[0] MPI startup(): I_MPI_HYDRA_BOOTSTRAP_EXEC_EXTRA_ARGS=--external-launcher
+[0] MPI startup(): I_MPI_HYDRA_RMK=slurm
+[0] MPI startup(): I_MPI_HYDRA_TOPOLIB=hwloc
+[0] MPI startup(): I_MPI_HYDRA_BRANCH_COUNT=-1
+[0] MPI startup(): I_MPI_HYDRA_BOOTSTRAP=slurm
+[0] MPI startup(): I_MPI_RETURN_WIN_MEM_NUMA=0
+[0] MPI startup(): I_MPI_PIN_CELL=core
+[0] MPI startup(): I_MPI_PIN_DOMAIN=1
+[0] MPI startup(): I_MPI_INTERNAL_MEM_POLICY=default
+[0] MPI startup(): I_MPI_COLL_INTRANODE=pt2pt
+[0] MPI startup(): I_MPI_DEBUG=5
+------------------------------------------------------------
+          Invoking FHI-aims ...
+
+          When using FHI-aims, please cite the following reference:
+
+            Volker Blum, Ralf Gehrke, Felix Hanke, Paula Havu,
+            Ville Havu, Xinguo Ren, Karsten Reuter, and Matthias Scheffler,
+            'Ab Initio Molecular Simulations with Numeric Atom-Centered Orbitals',
+            Computer Physics Communications 180, 2175-2196 (2009)
+
+          In addition, many other developments in FHI-aims are likely important for
+          your particular application. If so, please cite them. A partial list of references
+          is written at the end of this file. Thank you for giving credit to the authors
+          of these developments.
+
+          For general information about FHI-aims please find us at
+
+            https://fhi-aims.org
+
+          Online tutorials can be found at
+
+            https://fhi-aims-club.gitlab.io/tutorials/tutorials-overview/
+
+          For any questions about FHI-aims, please visit our slack channel at
+
+            https://fhi-aims.slack.com
+
+          and our main development and support site at
+
+            https://aims-git.rz-berlin.mpg.de .
+
+          The latter site, in particular, has a wiki to collect information, as well
+          as an issue tracker to log discussions, suggest improvements, and report issues
+          or bugs. https://aims-git.rz-berlin.mpg.de is also the main development site
+          of the project and all new and updated code versions can be obtained there.
+          Please send an email to aims-coordinators@ms1p.org and we will add
+          you to these sites. They are for you and everyone is welcome there.
+
+------------------------------------------------------------
+
+
+
+  Date     :  20261028, Time     :  171142.605
+  Time zero on CPU 1             :   0.763309000000000E+00  s.
+  Internal wall clock time zero  :           562439502.605  s.
+
+  FHI-aims created a unique identifier for this run for later identification
+  aims_uuid : E5AF0CFA-2B9B-402D-AD11-455EAC1AF156
+
+  Build configuration of the current instance of FHI-aims
+  -------------------------------------------------------
+  FHI-aims version      : 261007
+  Commit number         : GITDIR-NOTFOUND
+  CMake host system     : Linux-5.14.0-570.149.1.el9_6.x86_64
+  CMake version         : 3.26.5
+  OS Distribution       : Red Hat Enterprise Linux 9.6 (Plow)
+  Built on              : AMD EPYC 9454 48-Core Processor
+  Fortran compiler      : /software/bwhpc/common/toolkit/Intel_OneAPI/mpi/2021.14/bin/mpiifx (IntelLLVM) version 2025.0.4
+  Fortran compiler flags: -O3 -march=skylake-avx512 -fp-model precise
+  C compiler            : /software/bwhpc/common/toolkit/Intel_OneAPI/mpi/2021.14/bin/mpiicx (IntelLLVM) version 2025.0.4
+  C compiler flags      : -O3 -march=skylake-avx512 -fp-model precise -std=gnu99
+  C++ compiler          : /software/bwhpc/common/toolkit/Intel_OneAPI/mpi/2021.14/bin/mpiicpx (IntelLLVM) version 2025.0.4
+  C++ compiler flags    : -O3 -march=skylake-avx512 -fp-model precise
+  HIP compiler          :
+  HIP compiler flags    :
+  HIP GPU arch          :
+  ELSI version          : 2.12.0
+  ELPA API version      : 20190501
+  ELPA2 kernel          : AVX512
+  Using MPI
+  Using ScaLAPACK
+  Using LibXC
+  Using i-PI
+  Using RLSY
+  Using GREENX
+  Linking against: /software/bwhpc/common/toolkit/Intel_OneAPI/mkl/2025.0/lib/intel64/libmkl_scalapack_lp64.so
+                   /software/bwhpc/common/toolkit/Intel_OneAPI/mkl/2025.0/lib/intel64/libmkl_blacs_intelmpi_lp64.so
+                   /software/bwhpc/common/toolkit/Intel_OneAPI/mkl/2025.0/lib/intel64/libmkl_intel_lp64.so
+                   /software/bwhpc/common/toolkit/Intel_OneAPI/mkl/2025.0/lib/intel64/libmkl_sequential.so
+                   /software/bwhpc/common/toolkit/Intel_OneAPI/mkl/2025.0/lib/intel64/libmkl_core.so
+
+  Using       32 parallel tasks.
+  Task     0 on core   3 (domain 3) of host uc3n104.localdomain reporting.
+  Task     1 on core   5 (domain 5) of host uc3n104.localdomain reporting.
+  Task     2 on core   6 (domain 6) of host uc3n104.localdomain reporting.
+  Task     3 on core   7 (domain 7) of host uc3n104.localdomain reporting.
+  Task     4 on core  11 (domain 11) of host uc3n104.localdomain reporting.
+  Task     5 on core  48 (domain 48) of host uc3n104.localdomain reporting.
+  Task     6 on core  49 (domain 49) of host uc3n104.localdomain reporting.
+  Task     7 on core  50 (domain 50) of host uc3n104.localdomain reporting.
+  Task     8 on core  51 (domain 51) of host uc3n104.localdomain reporting.
+  Task     9 on core  52 (domain 52) of host uc3n104.localdomain reporting.
+  Task    10 on core  53 (domain 53) of host uc3n104.localdomain reporting.
+  Task    11 on core  54 (domain 54) of host uc3n104.localdomain reporting.
+  Task    12 on core  55 (domain 55) of host uc3n104.localdomain reporting.
+  Task    13 on core  56 (domain 56) of host uc3n104.localdomain reporting.
+  Task    14 on core  57 (domain 57) of host uc3n104.localdomain reporting.
+  Task    15 on core  58 (domain 58) of host uc3n104.localdomain reporting.
+  Task    16 on core  59 (domain 59) of host uc3n104.localdomain reporting.
+  Task    17 on core  12 (domain 12) of host uc3n104.localdomain reporting.
+  Task    18 on core  13 (domain 13) of host uc3n104.localdomain reporting.
+  Task    19 on core  14 (domain 14) of host uc3n104.localdomain reporting.
+  Task    20 on core  15 (domain 15) of host uc3n104.localdomain reporting.
+  Task    21 on core  16 (domain 16) of host uc3n104.localdomain reporting.
+  Task    22 on core  17 (domain 17) of host uc3n104.localdomain reporting.
+  Task    23 on core  18 (domain 18) of host uc3n104.localdomain reporting.
+  Task    24 on core  19 (domain 19) of host uc3n104.localdomain reporting.
+  Task    25 on core  20 (domain 20) of host uc3n104.localdomain reporting.
+  Task    26 on core  21 (domain 21) of host uc3n104.localdomain reporting.
+  Task    27 on core  22 (domain 22) of host uc3n104.localdomain reporting.
+  Task    28 on core  60 (domain 60) of host uc3n104.localdomain reporting.
+  Task    29 on core  61 (domain 61) of host uc3n104.localdomain reporting.
+  Task    30 on core  62 (domain 62) of host uc3n104.localdomain reporting.
+  Task    31 on core  63 (domain 63) of host uc3n104.localdomain reporting.
+
+  Obtaining array dimensions for all initial allocations:
+  
+  -----------------------------------------------------------------------
+  Parsing control.in (first pass over file, find array dimensions only).
+  The contents of control.in will be repeated verbatim below
+  unless switched off by setting 'verbatim_writeout .false.' .
+  in the first line of control.in .
+  -----------------------------------------------------------------------
+  
+  #===============================================================================
+  # Created using the Atomic Simulation Environment (ASE)
+  
+  # Wed Oct 28 17:11:39 2026
+  
+  #===============================================================================
+  xc                                 pbe
+  relativistic                       atomic_zora scalar
+  occupation_type                    methfessel-paxton 0.1 1
+  spin                               none
+  use_dipole_correction              .true.
+  sc_accuracy_rho                    1e-06
+  sc_iter_limit                      200
+  compute_forces                     .true.
+  k_grid                             5 5 1
+  compute_analytical_stress          .true.
+  #===============================================================================
+  
+  ################################################################################
+  #
+  #  FHI-aims code project
+  #  VB, Fritz-Haber Institut, 2009
+  #
+  #  Suggested "light" defaults for Pd atom (to be pasted into control.in file)
+  #  Be sure to double-check any results obtained with these settings for post-processing,
+  #  e.g., with the "tight" defaults and larger basis sets.
+  #
+  ################################################################################
+    species        Pd
+  #     global species definitions
+      nucleus             46
+      mass                106.42
+  #
+      l_hartree           4
+  #
+      cut_pot             3.5  1.5  1.0
+      basis_dep_cutoff    1e-4
+  #
+      radial_base         62 5.0
+      radial_multiplier   1
+      angular_grids specified
+        division   0.5211   50
+        division   0.9161  110
+        division   1.2296  194
+        division   1.5678  302
+  #      division   1.9785  434
+  #      division   2.0474  590
+  #      division   2.1195  770
+  #      division   2.1568  974
+  #      division   2.7392 1202
+  #       outer_grid  974
+         outer_grid  302
+  ################################################################################
+  #
+  #  Definition of "minimal" basis
+  #
+  ################################################################################
+  #     valence basis states
+      valence      5  s   1.
+      valence      4  p   6.
+      valence      4  d   9.
+  #     ion occupancy
+      ion_occ     5  s   0.
+      ion_occ     4  p   6.
+      ion_occ     4  d   8.
+  ################################################################################
+  #
+  #  Suggested additional basis functions. For production calculations,
+  #  uncomment them one after another (the most important basis functions are
+  #  listed first).
+  #
+  #  Constructed for dimers: 2.0 A, 2.275 A, 2.75 A, 3.75 A
+  #
+  ################################################################################
+  #  "First tier" - max. impr. -120.76  meV, min. impr. -5.71 meV
+       ionic 5 p auto
+       hydro 4 f 8
+  #     hydro 5 g 10
+       hydro 3 s 2.6
+       hydro 3 d 2.5
+  #  "Second tier" - max. impr. -5.00  meV, min. impr. -0.62 meV
+  #     hydro 5 f 17.2
+  [... removed for the test fixture ...]
+          Begin self-consistency iteration #    1
+
+  Date     :  20261028, Time     :  171150.468
+------------------------------------------------------------
+  Pulay mixing of updated and previous charge densities.
+  Available memory per node after mixing [GB]:    726.86
+  Renormalizing the density to the exact electron count on the 3D integration grid.
+  | Formal number of electrons (from input files) :    2070.0000000000
+  | Integrated number of electrons on 3D grid     :    2070.0133127013
+  | Charge integration error                      :       0.0133127013
+  | Normalization factor for density and gradient :       0.9999935688
+
+  Evaluating partitioned Hartree potential by multipole expansion.
+  | Original multipole sum: apparent total charge =   0.110838E-11
+  | Sum of charges compensated after spline to logarithmic grids =   0.820292E-05
+  | Analytical far-field extrapolation by fixed multipoles:
+  | Hartree multipole sum: apparent total charge =   0.110837E-11
+  [...]
+  Total energy components:
+  | Sum of eigenvalues            :     -139207.15513700 Ha    -3788019.42358418 eV
+  | XC energy correction          :       -6512.19103692 Ha     -177205.73424308 eV
+  | XC potential correction       :        8492.65685314 Ha      231096.95105733 eV
+  | Free-atom electrostatic energy:      -92452.72776175 Ha    -2515766.72319877 eV
+  | Hartree energy correction     :           7.59777511 Ha         206.74597986 eV
+  | Entropy correction            :          -0.00758427 Ha          -0.20637847 eV
+  | ---------------------------
+  | Total energy                  :     -229671.81930742 Ha    -6249688.18398884 eV
+  | Total energy, T -> 0          :     -229671.82941978 Ha    -6249688.45916013 eV  <-- do not rely on this value for anything but (periodic) metals
+  | Electronic free energy        :     -229671.83447596 Ha    -6249688.59674577 eV
+
+  Derived energy quantities:
+  | Kinetic energy                :      238287.95647112 Ha     6484145.20525495 eV
+  | Electrostatic energy          :     -461447.58474163 Ha   -12556627.65500071 eV
+  | Energy correction for multipole
+  | error in Hartree potential    :           0.00188575 Ha           0.05131390 eV
+  | Sum of eigenvalues per atom                           :      -84178.20941298 eV
+  | Total energy (T->0) per atom                          :     -138881.96575911 eV  <-- do not rely on this value for anything but (periodic) metals
+  | Electronic free energy per atom                       :     -138881.96881657 eV
+  Evaluating new KS density using the density matrix
+  Evaluating density matrix
+  Computing the DM
+  Selected method: ELPA_AT_A (preferred and supported)
+  Using optimized A^T*A routine
+  Finished density matrix calculation
+  | Time :     0.168 s
+  Time summed over all CPUs for getting density from density matrix: real work       22.289 s, elapsed       25.253 s
+  Integration grid: deviation in total charge (<rho> - N_e) =   3.642045E-01
+
+  ** Warning: The absolute deviation in total charge is greater than 1E-5. Something seems to go wrong with this calculation.
+  This is not always an indication for an erroneous calculation, but has indicated faulty calculations in the past,
+  where the MPI communication was wrongly set up on HPC systems.
+  To check if this is the case for you and to find the workarounds, please see the section A.9.1 'Charge integration errors'
+  in the FHI-aims manual.
+  We will stop the code now to avoid unnecessary SCF iterations. If you are sure that your calculation is running correctly,
+  e.g. you are running a very large system with sparse integration grids, you may set the flag 'override_error_charge_integration .true.'
+  in your control file to disable this check.
+ *** look_at_rho: ** Error: Charge integration error is too large.
+ 

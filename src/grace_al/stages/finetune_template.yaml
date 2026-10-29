@@ -1,0 +1,45 @@
+{#- gracemaker input.yaml of the finetune stage (Jinja). finetune.extra is deep-merged on
+    top of the rendered YAML. Values are emitted as JSON, which YAML reads as-is. -#}
+seed: 1
+cutoff: 6.0    # informational; the model's own cutoff is used
+
+data:
+  filename: {{ train | tojson }}
+  test_size: {{ f.test_size }}
+  # auto: per-element E0 by least squares, so the fit sees small energies instead of
+  # all-electron totals (-6.6 keV per Al atom in FHI-aims)
+  reference_energy: {{ reference_energy | tojson }}
+
+potential:
+{%- if start_from == "previous" %}
+  # continue from the previous round's model (already reduced to these elements)
+  filename: {{ previous.model_yaml | tojson }}
+  checkpoint_name: {{ previous.checkpoint | tojson }}
+{%- else %}
+  finetune_foundation_model: {{ fm | tojson }}
+  reduce_elements: True
+  shift: auto
+{%- endif %}
+
+fit:
+  loss:
+    energy: {weight: {{ f.energy_weight }}}
+    forces: {weight: {{ f.force_weight }}}
+{%- if stress %}
+    stress: {weight: {{ f.stress_weight }}}
+{%- endif %}
+  optimizer: Adam
+  opt_params: {learning_rate: {{ f.learning_rate }}, use_ema: True, ema_momentum: 0.99,
+               weight_decay: null, clipnorm: 1.0}
+  scheduler: cosine_decay
+  scheduler_params: {minimum_learning_rate: {{ f.learning_rate / 12 }}}
+  target_total_updates: {{ f.target_total_updates }}
+  batch_size: {{ f.batch_size }}
+  eval_init_stats: True
+  jit_compile: True
+{%- if start_from == "previous" %}
+  reset_epoch_and_step: True
+{%- endif %}
+{%- if trainable %}
+  trainable_variable_names: {{ trainable | tojson }}
+{%- endif %}

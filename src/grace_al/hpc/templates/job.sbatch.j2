@@ -1,0 +1,56 @@
+#!/bin/bash
+# grace-al GPU job ({{ job_kind }}), written by `grace-al submit` - edit the config, not this file.
+# HAL + fine-tuning on the GPU{% if label_mode == "inline" %}, FHI-aims on the CPU tasks of the same node{% endif %}.
+#SBATCH --job-name={{ job_name }}
+{% if hpc.partition_gpu %}#SBATCH --partition={{ hpc.partition_gpu }}
+{% endif %}{% if hpc.account %}#SBATCH --account={{ hpc.account }}
+{% endif %}#SBATCH --nodes=1
+#SBATCH --ntasks={{ hpc.ntasks }}
+#SBATCH --cpus-per-task={{ hpc.cpus_per_task }}
+#SBATCH --gres={{ hpc.gres }}
+#SBATCH --mem={{ hpc.mem }}
+#SBATCH --time={{ hpc.time }}
+#SBATCH --signal=B:USR1@900
+#SBATCH --output={{ logs }}/al_%j.log
+{% for line in hpc.sbatch_extra %}#SBATCH {{ line }}
+{% endfor %}
+cd "{{ home }}" || exit 1
+GRACE_AL=("{{ python }}" -m grace_al)
+CONFIG="{{ config }}"
+
+# 1. the modules FHI-aims was built with, saved for every aims run (before the Python env,
+#    whose own Intel MPI must not reach aims)
+module purge
+{% if hpc.modules %}module load {{ hpc.modules | join(" ") }}
+{% endif %}{{ save_env }}
+
+# 2. the Python env
+{% if hpc.activate %}{{ hpc.activate }}
+{% endif %}{% for k, v in hpc.env.items() %}export {{ k }}={{ v | shell_quote }}
+{% endfor %}export TF_FORCE_GPU_ALLOW_GROWTH=true TF_CPP_MIN_LOG_LEVEL=2
+export OMP_NUM_THREADS={{ threads }} TF_NUM_INTRAOP_THREADS={{ threads }} TF_NUM_INTEROP_THREADS=1
+
+# 3. near the time limit (USR1, 15 min before): stop the workflow, submit the next job
+resubmit() {
+    echo "$(date): time limit near, stopping the workflow"
+    kill -TERM "$PID" 2>/dev/null
+    wait "$PID"
+    "${GRACE_AL[@]}" submit "$CONFIG" --resubmit {{ resubmit + 1 }}
+    exit 0
+}
+trap resubmit USR1
+
+echo "$(date): job $SLURM_JOB_ID on $(hostname), submission {{ resubmit }}"
+nvidia-smi -L 2>/dev/null
+"${GRACE_AL[@]}" check "$CONFIG" --in-job || { echo "preflight failed"; exit 1; }
+
+"${GRACE_AL[@]}" run "$CONFIG" &
+PID=$!
+wait "$PID"
+rc=$?
+echo "$(date): grace-al run exited with code $rc"
+{% if label_mode == "array" %}if ((rc == 3)); then
+    # DFT as a CPU job array + this job again after it (afterany)
+    "${GRACE_AL[@]}" submit "$CONFIG" --labels
+fi
+{% endif %}exit $rc
