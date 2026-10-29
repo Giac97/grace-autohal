@@ -9,7 +9,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `(top level)`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `schema_version` | int | `1` | config format version; configs without it are read as al_workflow.py configs and migrated |
 | `site` | str \| None | `null` | site profile (bwunicluster3, workstation, or a YAML path) merged under this file |
 | `workdir` | Path | `runs` | campaign output folder (state.json, round_XX/) |
@@ -30,7 +30,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `system`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `generator` | str | `surface` | entry point group grace_al.systems |
 | `surface` | SurfaceConfig \| None | `null` | slab (generator surface) |
 | `bulk` | BulkConfig \| None | `null` | crystal (generator bulk) |
@@ -41,7 +41,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `system.surface`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `element` | str | required | element of the slab |
 | `facet` | fcc100 \| fcc110 \| fcc111 \| fcc211 \| bcc100 \| bcc110 \| bcc111 \| hcp0001 \| hcp10m10 \| diamond100 \| diamond111 | `fcc111` | type: ignore[valid-type] |
 | `size` | list[int] | `[3, 3, 5]` | lateral repeats x, y and number of layers |
@@ -54,7 +54,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `system.bulk`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `element` | str | required | or a compound for ase.build.bulk (e.g. NaCl, rocksalt) |
 | `crystalstructure` | str \| None | `null` | fcc, bcc, hcp, diamond, rocksalt, ...; None: ASE's |
 | `a` | float \| None | `null` | lattice constant in Å; null = ASE reference value |
@@ -67,7 +67,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `system.adsorbate`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `species` | str | required | element or ase.build.molecule name |
 | `sites` | list[str] \| None | `null` | None = all sites of the facet |
 | `height` | float | `1.5` | Å above the top layer, before the pre-relaxation |
@@ -77,7 +77,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `system.initial`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `strains` | list[float] | `[0.98, 1.0, 1.02]` | lateral (surface) or isotropic (bulk) strain factors |
 | `coverages` | list[int] | `[2, 3]` | numbers of adsorbates of the random coverage configs |
 | `n_per_coverage` | int | `2` | random configs per coverage (bulk: per vacancy count and strain) |
@@ -92,7 +92,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `artifact`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `rp_dim_round0` | int | `32` | lowered automatically when an element has few atoms |
 | `rp_dim` | int | `128` | feature dimension of later rounds' artifacts (capped by the atom count of the scarcest element) |
 | `n_clusters` | list[int] | `[1, 2, 4, 8, 16]` | GMM cluster counts tried per element (round 0: [1]) |
@@ -101,7 +101,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `explore`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `ensembles` | list[nvt \| nvt_ramp \| npt \| npt_stress \| cluster] | `['nvt']` | HAL ensembles: nvt, nvt_ramp, npt, npt_stress, cluster (slabs: nvt) |
 | `temperatures` | list[int \| float] | `[800, 1200]` | K |
 | `tau` | list[float] | `[0.25]` | bias strength(s): too small collects nothing, too large gets rejected |
@@ -109,7 +109,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 | `walkers_per_setting` | int | `4` | walkers per (ensemble, T, tau) |
 | `backend` | inproc \| pool | `pool` | pool: walkers as subprocesses sharing the GPU; inproc: one by one in the main process |
 | `walkers_per_gpu` | int | `8` | pool: walkers at a time per GPU (or on the CPU without one) |
-| `run_hal_kwargs` | dict[str, Any] | `{}` | extra run_hal options (pool: passed as --kebab-case flags) |
+| `run_hal_kwargs` | dict[str, Any] | `{}` | extra run_hal options (pool: passed as `--kebab-case` flags) |
 | `start_weights` | dict[str, float] | `{'clean': 0.2}` | max fraction of walkers starting from frames whose info["config"] starts with the key |
 | `allow_cell_change_on_slab` | bool | `False` | nvt_ramp/npt rescale the vacuum too |
 | `calibrate` | bool | `False` | tau calibration (round 0): short walkers over calibrate_taus, keep the largest tau whose rejected/(collected+rejected) <= max_reject_ratio and that collects something |
@@ -123,14 +123,14 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `select`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `max_per_round` | int | `100` | cap on calm-greedy's natural set |
 | `n_random` | int | `5` | random picks per round (out-of-sample validation, convergence) |
 
 ## `label`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `labeler` | str | `aims` | aims / teacher / manual / module:function |
 | `teacher_model` | str \| None | `null` | labeler: teacher |
 | `mode` | inline \| concurrent \| array | `inline` | inline: in the GPU job; concurrent: several at once; array: CPU job array |
@@ -140,7 +140,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `aims`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `command` | Path \| None | `null` | legacy launcher script (run_aims.sh) |
 | `bin` | str \| None | `null` | aims.x; default: $AIMS_BIN |
 | `np` | int | `8` | MPI ranks when AIMS_NP / SLURM_NTASKS are not set |
@@ -153,14 +153,14 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `validation`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `include_round0` | bool | `True` | round 0 too: the foundation model vs the first DFT data |
 | `parity` | bool | `True` | validate/parity.png + parity.npz every round |
 
 ## `finetune`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `frozen` | bool | `True` | train only the reducing_ weights |
 | `reference_energy` | Union[auto, float, dict[str, float]] | `auto` | auto: per-element E0 by least squares (aims totals are all-electron); or a number / {element: E0} |
 | `learning_rate` | float | `0.001` | start of the cosine schedule (minimum: lr / 12) |
@@ -176,7 +176,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `convergence`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `max_natural_set` | int | `0` | stop when calm-greedy finds at most this many frames |
 | `force_rmse` | float \| None | `null` | eV/Å on the random picks |
 | `max_rounds` | int | `5` | stop after this many rounds |
@@ -184,7 +184,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 ## `hpc`
 
 | key | type | default | meaning |
-|---|---|---|---|
+|---------------|---------|----------|-----------------------|
 | `scheduler` | slurm | `slurm` | batch system |
 | `partition_gpu` | str \| None | `null` | partition of the GPU job (must be open to your group: grace-al prepare) |
 | `partition_cpu` | str \| None | `null` | partition of the DFT job array |

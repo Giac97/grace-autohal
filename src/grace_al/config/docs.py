@@ -98,7 +98,7 @@ DESCRIPTIONS = {
     "explore.backend": "pool: walkers as subprocesses sharing the GPU; inproc: one by one in "
                        "the main process",
     "explore.walkers_per_gpu": "pool: walkers at a time per GPU (or on the CPU without one)",
-    "explore.run_hal_kwargs": "extra run_hal options (pool: passed as --kebab-case flags)",
+    "explore.run_hal_kwargs": "extra run_hal options (pool: passed as `--kebab-case` flags)",
     "explore.calibrate_taus": "tau values tried by the calibration",
     "explore.calibrate_steps": "MD steps of a calibration walker",
     "explore.calibrate_starts": "calibration walkers per tau",
@@ -199,7 +199,9 @@ def description(section: str, model: type[BaseModel], key: str) -> str:
 
 
 def table(name: str, model: type[BaseModel]) -> str:
-    rows = ["| key | type | default | meaning |", "|---|---|---|---|"]
+    # dash counts = relative column widths for pandoc (PDF); mkdocs ignores them
+    rows = ["| key | type | default | meaning |",
+            "|---------------|---------|----------|-----------------------|"]
     for key, f in model.model_fields.items():
         if f.exclude:
             continue
