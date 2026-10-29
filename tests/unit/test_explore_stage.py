@@ -70,7 +70,9 @@ def test_summary_and_walkers_txt(make_ctx):
     assert s["zero_collected_fraction"] == 0.25
     assert s["reject_ratio"] == pytest.approx(3 / 12)
     assert (ctx.rdir / "hal" / "walkers.txt").read_text().split() == ["w000", "w002", "w003"]
-    assert s["warnings"] == []
+    # 3 of 12 rejected: above max_reject_ratio 0.2 -> one step down the calibration grid
+    assert s["tau_advice"]["verdict"] == "decrease" and s["tau_advice"]["suggested"] == 0.2
+    assert len(s["warnings"]) == 1 and "tau too large" in s["warnings"][0]
 
 
 def test_plan_loaded_not_rebuilt(make_ctx):

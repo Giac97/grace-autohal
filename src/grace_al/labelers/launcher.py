@@ -140,16 +140,46 @@ def run_aims(task_dir: Path, cfg: Config, np: int | None = None,
     cmd = build_command(cfg, np)
     timeout = cfg.aims.timeout if cfg.aims else None
     log.debug("$ %s   (in %s)", " ".join(cmd), task_dir)
-    with open(task_dir / "aims.out", "wb") as out, open(task_dir / "aims.err", "wb") as err:
-        try:
-            return subprocess.run(cmd, cwd=task_dir, env=env, stdout=out, stderr=err,
-                                  preexec_fn=_unlimited_stack, timeout=timeout).returncode
-        except subprocess.TimeoutExpired:
-            err.write(f"\ngrace-al: timeout after {timeout} s (aims.timeout)\n".encode())
-            return -9
-        except FileNotFoundError as e:   # mpirun not found
-            err.write(f"\ngrace-al: {e} (mpirun: command not found)\n".encode())
-            return 127
+    timing = start_timing(task_dir, ranks=np)
+    rc = 127
+    try:
+        with open(task_dir / "aims.out", "wb") as out, \
+                open(task_dir / "aims.err", "wb") as err:
+            try:
+                rc = subprocess.run(cmd, cwd=task_dir, env=env, stdout=out, stderr=err,
+                                    preexec_fn=_unlimited_stack, timeout=timeout).returncode
+            except subprocess.TimeoutExpired:
+                err.write(f"\ngrace-al: timeout after {timeout} s (aims.timeout)\n".encode())
+                rc = -9
+            except FileNotFoundError as e:   # mpirun not found
+                err.write(f"\ngrace-al: {e} (mpirun: command not found)\n".encode())
+                rc = 127
+    finally:
+        end_timing(task_dir, timing, rc)
+    return rc
+
+
+TIMING = "timing.json"
+
+
+def start_timing(d: Path, **info) -> dict:
+    """d/timing.json: {start, end: null, host, job, ...} (read by `grace-al status`)."""
+    import json
+    import socket
+    import time
+
+    t = {"start": time.time(), "end": None, "host": socket.gethostname(),
+         "job": os.environ.get("SLURM_JOB_ID"), **info}
+    d.mkdir(parents=True, exist_ok=True)
+    (d / TIMING).write_text(json.dumps(t))
+    return t
+
+
+def end_timing(d: Path, t: dict, exit_code: int | None = None) -> None:
+    import json
+    import time
+
+    (d / TIMING).write_text(json.dumps({**t, "end": time.time(), "exit_code": exit_code}))
 
 
 def run_task(cfg: Config, task_dir: Path, np: int | None = None) -> int:

@@ -57,3 +57,13 @@ def test_fit_reference_energies(tmp_path):
         "INFO reference_energy=auto: computed single-atom energies (eV): "
         "{'O': -2047.1, 'Pd': -136000.5}\n")
     assert _tp.fit_reference_energies(tmp_path) == {"O": -2047.1, "Pd": -136000.5}
+
+
+def test_fit_reference_energies_in_seed_folder(tmp_path):
+    """gracemaker writes log.txt into fit/seed/1/ (real layout)."""
+    (tmp_path / "seed" / "1").mkdir(parents=True)
+    (tmp_path / "seed" / "1" / "log.txt").write_text(
+        "2026-10-29 14:45:16,956 I - reference_energy=auto: computed single-atom energies "
+        "(eV): {'O': -6.123339195302772, 'Pd': -4.973367337893022}\n")
+    assert _tp.fit_reference_energies(tmp_path) == {"O": -6.123339195302772,
+                                                    "Pd": -4.973367337893022}

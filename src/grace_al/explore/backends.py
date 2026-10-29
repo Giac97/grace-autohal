@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from grace_al import _tp
+from grace_al.labelers.launcher import end_timing, start_timing
 
 if TYPE_CHECKING:
     from grace_al.explore.plan import WalkerSpec
@@ -65,10 +66,12 @@ class InprocBackend:
                 out = hal / w.dir
                 if done(out):
                     continue
+                t = start_timing(out, walker=w.id)
                 s = _tp.hal_run_inproc(starts[w.start_index].copy(), model, out,
                                        ensemble=w.ensemble, temperature_K=w.temperature,
                                        n_steps=w.n_steps, tau=w.tau, seed=w.seed,
                                        walker_id=w.id, **{**self.kw, **w.extra})
+                end_timing(out, t, 0)
                 log.info("walker %d (%s T=%g tau=%g): %s, collected %d", w.id, w.ensemble,
                          w.temperature, w.tau, s["stop_reason"], s["n_collected"])
         finally:
@@ -123,7 +126,7 @@ def run_pool(jobs: Sequence[Job], slots: list[dict[str, str]],
     A failing job doesn't stop the others. SIGTERM: terminate the children, raise
     Terminated."""
     queue, free = list(jobs), list(range(len(slots)))
-    running: dict[int, tuple[Job, subprocess.Popen, int]] = {}
+    running: dict[int, tuple[Job, subprocess.Popen, int, dict]] = {}
     codes: dict[int, int] = {}
     stop = []
     old = signal.signal(signal.SIGTERM, lambda s, f: stop.append(s))
@@ -137,13 +140,15 @@ def run_pool(jobs: Sequence[Job], slots: list[dict[str, str]],
                 job.log_file.parent.mkdir(parents=True, exist_ok=True)
                 fh = open(job.log_file, "ab")
                 env = {**os.environ, **slots[slot], **job.env}
+                timing = start_timing(job.log_file.parent, walker=job.id, slot=slot)
                 proc = subprocess.Popen(job.cmd, stdout=fh, stderr=subprocess.STDOUT, env=env)
                 fh.close()
-                running[job.id] = (job, proc, slot)
-            for jid, (job, proc, slot) in list(running.items()):
+                running[job.id] = (job, proc, slot, timing)
+            for jid, (job, proc, slot, timing) in list(running.items()):
                 rc = proc.poll()
                 if rc is None:
                     continue
+                end_timing(job.log_file.parent, timing, rc)
                 del running[jid]
                 free.append(slot)
                 codes[jid] = rc
@@ -152,7 +157,7 @@ def run_pool(jobs: Sequence[Job], slots: list[dict[str, str]],
             time.sleep(poll)
     finally:
         signal.signal(signal.SIGTERM, old)
-        _terminate([p for _, p, _ in running.values()], grace)
+        _terminate([p for _, p, _, _ in running.values()], grace)
     return codes
 
 

@@ -304,6 +304,8 @@ def status(config: ConfigArg, site: SiteOpt = None):
                   fmt(r["fit_done"]),
                   f"{fmt(r['val_force_rmse'])} ({fmt(rnd)})" if r["val_force_rmse"] else "–")
     console.print(t)
+    _print_progress(cfg, st)
+    _print_tau_advice(cfg)
     ids = [str(j["id"]) for j in st.jobs[-8:]]
     acct = {a["JobID"].split("_")[0]: a for a in slurm.sacct(ids)}
     if st.jobs:
@@ -313,6 +315,53 @@ def status(config: ConfigArg, site: SiteOpt = None):
             jt.add_row(str(j["id"]), j.get("kind", ""), j.get("submitted", ""),
                        a.get("State", "?"), a.get("Elapsed", ""), a.get("ExitCode", ""))
         console.print(jt)
+
+
+def _print_progress(cfg, st) -> None:
+    """Live progress of the running (or waiting) stage."""
+    from datetime import datetime, timezone
+
+    from grace_al.progress import fmt_duration, stage_progress
+
+    if st.status not in ("running", "waiting_for_labels") or not st.stage:
+        return
+    p = stage_progress(cfg, st.round, st.stage)
+    since = ""
+    if st.status == "running" and st.updated:
+        el = (datetime.now(timezone.utc) - datetime.fromisoformat(st.updated)).total_seconds()
+        since = f", running for {fmt_duration(el)}"
+    console.print(f"\n[bold]round {st.round}, {st.stage}{since}[/bold]", highlight=False)
+    if p is None:
+        return
+    if "epochs_done" in p:
+        console.print(f"  {p['what']}: {p['epochs_done']} / {p['epochs_total'] or '?'}, "
+                      f"ETA ~{fmt_duration(p['eta_s'])}", highlight=False)
+        return
+    console.print(f"  {p['what']}: {p['done']} done, {p['running']} running, {p['failed']} "
+                  f"failed, {p['pending']} pending of {p['total']} ({p['parallel']} at a time)",
+                  highlight=False)
+    if p["mean_s"] is not None:
+        console.print(f"  time per item: {fmt_duration(p['mean_s'])} on average "
+                      f"({fmt_duration(p['min_s'])} - {fmt_duration(p['max_s'])}); "
+                      f"ETA ~{fmt_duration(p['eta_s'])}", highlight=False)
+    for r in p["running_items"][:8]:
+        console.print(f"    {r['name']}  {r.get('detail', '')}  "
+                      f"{fmt_duration(r.get('elapsed'))}", highlight=False)
+    if len(p["running_items"]) > 8:
+        console.print(f"    ... {len(p['running_items']) - 8} more", highlight=False)
+
+
+def _print_tau_advice(cfg) -> None:
+    from grace_al.state import read_marker, round_dir, rounds_on_disk
+
+    for k in reversed(rounds_on_disk(cfg.workdir)):
+        m = read_marker(round_dir(cfg.workdir, k), "explore")
+        advice = (m or {}).get("summary", {}).get("tau_advice")
+        if advice:
+            style = "yellow" if advice["verdict"] in ("increase", "decrease") else None
+            console.print(f"\ntau (round {k}): {advice['message']}", style=style,
+                          highlight=False)
+            return
 
 
 @app.command()
@@ -359,6 +408,71 @@ def report(
     out, rows = write_report(cfg, html)
     console.print(f"{len(rows)} round(s): plots in {out}"
                   + (f", {out / 'index.html'}" if html else ""))
+
+
+@app.command()
+def validate(
+    config: ConfigArg,
+    prop: Annotated[Optional[list[str]], typer.Option(  # noqa: UP045
+        "--property", "-p", help="energy, relative, adsorption, cohesive (repeatable; "
+        "default: energy, relative, + adsorption for surfaces)")] = None,
+    model: Annotated[str, typer.Option(help="fm | last | round:K (the model fine-tuned in "
+                                       "round K)")] = "last",
+    data: Annotated[Optional[Path], typer.Option(  # noqa: UP045
+        help="DFT-labeled structures (extxyz/pkl) instead of all labeled rounds")] = None,
+    references: Annotated[Optional[Path], typer.Option(  # noqa: UP045
+        help="DFT-labeled reference structures (isolated atoms, gas molecules) for "
+             "adsorption / cohesive energies")] = None,
+    substrate: Annotated[Optional[list[str]], typer.Option(  # noqa: UP045
+        help="substrate elements for adsorption (default: system.surface.element)")] = None,
+    site: SiteOpt = None,
+):
+    """Parity plots (+ .npz to replot) of a model vs DFT for derived properties."""
+    from grace_al.properties import PropertyError, run
+
+    cfg = _load(config, site)
+    props = prop or ["energy", "relative"] + (
+        ["adsorption"] if cfg.system is not None and cfg.system.surface is not None else [])
+    try:
+        res = run(cfg, model, props, data, references, substrate)
+    except PropertyError as err:
+        console.print(f"[red]{err}[/red]", highlight=False)
+        raise typer.Exit(EXIT_ERROR) from None
+    from grace_al.report import fmt
+
+    console.print(f"model {res['model']}, {res['n_frames']} structures")
+    for p in props:
+        r = res.get(p, {})
+        if p == "energy":
+            console.print(f"  energy  RMSE {fmt(r['energy']['rmse'])} eV/atom, forces RMSE "
+                          f"{fmt(r['forces']['rmse'])} eV/Å  -> {r['plot']}", highlight=False)
+        elif r.get("n"):
+            console.print(f"  {p:<10} RMSE {fmt(r['rmse'])}  MAE {fmt(r['mae'])}  "
+                          f"(n={r['n']})  -> {r['plot']}", highlight=False)
+        else:
+            console.print(f"  {p:<10} no structures to compare", highlight=False)
+
+
+@app.command("export")
+def export_cmd(
+    config: ConfigArg,
+    round_: Annotated[Optional[int], typer.Option(  # noqa: UP045
+        "--round", help="round whose fitted model to export (default: the last one)")] = None,
+    out: Annotated[Optional[Path], typer.Option(  # noqa: UP045
+        help="output folder (default: <config dir>/export/round_XX)")] = None,
+    force: Annotated[bool, typer.Option(help="replace an existing export")] = False,
+    site: SiteOpt = None,
+):
+    """The fine-tuned model of a round as a self-contained folder with a model card."""
+    from grace_al.export import ExportError, export
+
+    cfg = _load(config, site)
+    try:
+        path = export(cfg, round_, out, force)
+    except ExportError as err:
+        console.print(f"[red]{err}[/red]", highlight=False)
+        raise typer.Exit(EXIT_ERROR) from None
+    console.print(f"exported to {path} (see MODEL_CARD.md)", highlight=False)
 
 
 @app.command("aims-run")

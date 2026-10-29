@@ -7,7 +7,7 @@ possible. `grace-al` repeats a round of:
 2. **explore**: uncertainty-biased MD (HAL) driven by the current model;
 3. **select**: a small, diverse set of the new structures (`grace_uq select`);
 4. **label**: FHI-aims on them (or a teacher model for dry runs);
-5. **validate**: the current model's errors on these new labels;
+5. **validate**: the current model's errors on these new labels (parity plot every round);
 6. **finetune**: gracemaker on all labels so far; the new model drives the next round.
 
 ```bash
@@ -30,6 +30,8 @@ grace-al report my_campaign/config.yaml --html
 | `status` | round history and jobs |
 | `redo` | delete a round's outputs from a stage on, so they are recomputed |
 | `report` | plots and tables in `runs/report/` |
+| `validate` | parity of any model vs DFT for energies, forces, relative / adsorption / cohesive energies |
+| `export` | a round's model as a self-contained folder with a model card |
 | `aims-run` | one aims calculation (used by the DFT job array) |
 
 Start with the [quickstart](quickstart.md); [concepts](concepts.md) explains what happens in a

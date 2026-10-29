@@ -22,6 +22,7 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 | `select` | SelectConfig | (section) | structure selection (grace_uq select) |
 | `label` | LabelConfig | (section) | labeling (DFT) |
 | `aims` | AimsConfig \| None | `null` | FHI-aims settings; keep them fixed for a campaign (refused if changed) |
+| `validation` | ValidationConfig | (section) | the driver's errors on each round's new DFT data (validate stage) |
 | `finetune` | FinetuneConfig | (section) | gracemaker fine-tuning |
 | `convergence` | ConvergenceConfig | (section) | stop criteria |
 | `hpc` | HpcConfig \| None | `null` | batch jobs (usually from the site profile) |
@@ -148,6 +149,13 @@ package defaults → site profile (`site:`) → `config.yaml` → environment va
 | `slab_min_vacuum` | float | `6.0` | Å; larger gap along c -> slab (k_z = 1, dipole) |
 | `timeout` | float \| None | `null` | s per calculation |
 | `parameters` | dict[str, Any] | (see schema.py) | control.in keywords on top of the defaults (pbe, atomic_zora, methfessel-paxton 0.1, dipole correction for slabs, ...); `key: null` removes a default |
+
+## `validation`
+
+| key | type | default | meaning |
+|---|---|---|---|
+| `include_round0` | bool | `True` | round 0 too: the foundation model vs the first DFT data |
+| `parity` | bool | `True` | validate/parity.png + parity.npz every round |
 
 ## `finetune`
 

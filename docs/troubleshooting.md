@@ -37,8 +37,9 @@ label stage's message already names the most common aims failure and its fix.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| "no walker collected anything" | τ too small or T too low | larger `explore.tau`, higher temperatures, or `explore.calibrate: true` |
-| "% of the extrapolative frames were rejected" | τ too large (molecules break up: `short_bond`) | smaller `explore.tau` |
+| "nothing collected at tau ..." | τ too small or T too low | the suggested τ (`grace-al status`), higher temperatures, or `explore.calibrate: true` |
+| "... % of the extrapolative frames rejected ... tau too large" | τ too large (molecules break up: `short_bond`) | the suggested smaller τ |
+| validation has no `random-all` frames | the natural set took every candidate, nothing left to draw from | more walkers / steps, or accept the calm-greedy errors as an upper bound |
 | "explore.ensembles [...] on a slab" | cell-changing ensembles rescale the vacuum | `[nvt]`, or `explore.allow_cell_change_on_slab: true` if you mean it |
 | "too few atoms per element for a CALM artifact" | an element (adsorbate) has fewer than 12 atoms in the data | more coverages, `n_per_coverage` or `n_rattle` in `system.initial` |
 | "N element(s) have no UQ training data" | FM elements not in your system | harmless |

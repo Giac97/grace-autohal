@@ -60,9 +60,15 @@ You can switch `label.mode` in the middle of a campaign; only the DFT settings t
 ## Watching a campaign
 
 ```bash
-grace-al status config.yaml        # rounds, the current stage, the last jobs (sacct)
+grace-al status config.yaml        # rounds, the running stage's progress, tau advice, jobs
 grace-al report config.yaml --html # runs/report/: plots + index.html
 ```
+
+While a stage runs (or the DFT array works), `status` reads its progress from the files:
+walkers or DFT calculations done / running / failed / pending, the time per item (mean, min -
+max, from each item's `timing.json` or aims's own timing), the running calculations with
+their current SCF iteration, and an ETA (items left / items at once x mean time); for the fit,
+epochs done / planned.
 
 The report shows HAL frames, the natural set, validation and fit errors per round, the γ of
 the selected frames, aims failures by category, and the wall time per round with the share

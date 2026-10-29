@@ -76,9 +76,10 @@ def test_two_rounds_finish(campaign):
 def test_markers(campaign):
     _, cfg, _ = campaign
     r0, r1 = (state.round_dir(cfg.workdir, k) for k in (0, 1))
-    for s in ("seeds", "artifact", "explore", "select", "label", "finetune"):
+    for s in ("seeds", "artifact", "explore", "select", "label", "validate", "finetune"):
         assert state.read_marker(r0, s) is not None, s
-    assert state.read_marker(r0, "validate") is None             # not in round 0
+    assert (r0 / "validate" / "parity.png").exists()            # the FM vs the first labels
+    assert (r0 / "validate" / "parity.npz").exists()
     for s in ("artifact", "explore", "select", "label", "validate", "finetune"):
         assert state.read_marker(r1, s) is not None, s
     assert (r1 / "fit" / "FINISHED").exists()

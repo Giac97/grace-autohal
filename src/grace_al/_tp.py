@@ -252,12 +252,12 @@ def gracemaker(fit_dir: Path, restart_latest: bool = False) -> None:
 
 def fit_reference_energies(fit_dir: Path) -> dict[str, float] | None:
     """Per-element E0 that gracemaker computed for `reference_energy: auto` (from its
-    log.txt; the last occurrence, i.e. that of the latest restart), or None."""
-    log_txt = fit_dir / "log.txt"
-    if not log_txt.exists():
+    log.txt in seed/1/; the last occurrence, i.e. that of the latest restart), or None."""
+    logs = [p for p in (fit_dir / "seed" / "1" / "log.txt", fit_dir / "log.txt") if p.exists()]
+    if not logs:
         return None
     found = re.findall(r"computed single-atom energies \(eV\): (\{[^}]*\})",
-                       log_txt.read_text(errors="ignore"))
+                       logs[0].read_text(errors="ignore"))
     return {k: float(v) for k, v in ast.literal_eval(found[-1]).items()} if found else None
 
 

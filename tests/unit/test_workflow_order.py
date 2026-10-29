@@ -41,7 +41,7 @@ def test_stage_order_over_two_rounds(campaign):
     assert workflow.run(cfg) == "finished"
     assert [(k, s) for k, s, *_ in calls] == [
         (0, "seeds"), (0, "artifact"), (0, "explore"), (0, "select"), (0, "label"),
-        (0, "finetune"),
+        (0, "validate"), (0, "finetune"),
         (1, "artifact"), (1, "explore"), (1, "select"), (1, "label"), (1, "validate"),
         (1, "finetune")]
     assert (cfg.workdir / "FINISHED").read_text().startswith("finished")
@@ -114,3 +114,11 @@ def test_failure_recorded(campaign, monkeypatch):
         workflow.run(cfg)
     st = state.load_state(cfg.workdir)
     assert (st.round, st.stage, st.status) == (0, "explore", "failed")
+
+
+def test_round0_validation_can_be_switched_off(campaign):
+    cfg, calls, _ = campaign
+    cfg.validation.include_round0 = False
+    workflow.run(cfg)
+    assert (0, "validate") not in [(k, s) for k, s, *_ in calls]
+    assert (1, "validate") in [(k, s) for k, s, *_ in calls]

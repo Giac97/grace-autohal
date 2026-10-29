@@ -13,7 +13,7 @@ from collections import Counter
 from pathlib import Path
 
 from grace_al import data
-from grace_al.explore import calibrate
+from grace_al.explore import calibrate, tau_advice
 from grace_al.explore.backends import make_backend
 from grace_al.explore.plan import (
     PlanError,
@@ -59,15 +59,8 @@ def summarize(hal: Path, plan: list[WalkerSpec], failures: dict[int, dict]) -> d
 
 
 def warnings(s: dict) -> list[str]:
-    out = []
-    if s["n_walkers"] > s["n_failed"] and s["collected"] == 0:
-        out.append("no walker collected anything: tau too small or T too low "
-                   "(explore.tau, explore.temperatures)")
-    if s["reject_ratio"] > 0.5:
-        reason = next(iter(s["rejected"]), "?")
-        out.append(f"{100 * s['reject_ratio']:.0f} % of the extrapolative frames were "
-                   f"rejected (mostly: {reason}): tau too large (explore.tau)")
-    return out
+    advice = s.get("tau_advice") or {}
+    return [advice["message"]] if advice.get("verdict") in ("increase", "decrease") else []
 
 
 class ExploreStage:
@@ -105,6 +98,8 @@ class ExploreStage:
                  cfg.explore.backend)
         failures = backend.run(plan, starts_file, hal, ctx.driver)
         s = summarize(hal, plan, failures)
+        s["tau_advice"] = tau_advice.advise(s["walkers"], cfg.explore.max_reject_ratio,
+                                            cfg.explore.calibrate_taus)
         for msg in warnings(s):
             log.warning("round %d: %s", ctx.k, msg)
         s["warnings"] = warnings(s)

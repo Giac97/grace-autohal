@@ -22,7 +22,7 @@ log = logging.getLogger("grace_al.state")
 
 Status = Literal["running", "waiting_for_labels", "converged", "finished", "failed"]
 
-# order within a round (seeds: round 0 only; validate: from round 1)
+# order within a round (seeds: round 0 only; validate in round 0: validation.include_round0)
 STAGES = ("seeds", "artifact", "explore", "select", "label", "validate", "finetune")
 
 # what each stage writes, relative to runs/round_XX (redo deletes these; report reads them).

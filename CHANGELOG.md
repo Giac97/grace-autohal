@@ -21,5 +21,13 @@ First version of the package, built from the `al_workflow.py` scripts.
   on the random-pick force RMSE.
 - Fine-tuning from a template (frozen `reducing_` weights, reference energy / shift auto),
   `start_from: previous`, the artifact of every fitted model.
+- Validation from round 0 (the FM itself) with per-element energy offsets; parity plots
+  (`validate/parity.png` + `.npz`) every round.
+- `grace-al validate`: parity of any model for energies/forces, relative, adsorption and
+  cohesive energies (DFT-labeled references optional), PNG + `.npz`.
+- `grace-al export`: SavedModel, UQ model, checkpoint, training set, model card.
+- tau advice after every exploration (also in `status`).
+- `status` shows the running stage's progress: DFT calculations / walkers done, running,
+  pending, time per item and ETA; fit epochs.
 - SLURM: job scripts from the config, self-resubmission, DFT job-array chains, partition
   access check; `status` and `report` (plots, HTML).

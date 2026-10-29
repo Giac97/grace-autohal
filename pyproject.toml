@@ -74,4 +74,5 @@ files = ["src/grace_al/config", "src/grace_al/stages", "src/grace_al/labelers",
          "src/grace_al/data.py", "src/grace_al/models.py",
          "src/grace_al/preflight_aims.py", "src/grace_al/explore",
          "src/grace_al/preflight_explore.py", "src/grace_al/hpc",
-         "src/grace_al/report.py"]
+         "src/grace_al/report.py", "src/grace_al/parity.py", "src/grace_al/properties.py",
+         "src/grace_al/progress.py", "src/grace_al/export.py"]

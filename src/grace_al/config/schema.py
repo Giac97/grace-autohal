@@ -137,6 +137,11 @@ class SelectConfig(Section):
     n_random: int = 5
 
 
+class ValidationConfig(Section):
+    include_round0: bool = True       # round 0 too: the foundation model vs the first DFT data
+    parity: bool = True               # validate/parity.png + parity.npz every round
+
+
 class LabelConfig(Section):
     labeler: str = "aims"             # aims | teacher | manual | module:function
     teacher_model: str | None = None  # labeler: teacher
@@ -245,6 +250,7 @@ class Config(Section):
     select: SelectConfig = Field(default_factory=SelectConfig)
     label: LabelConfig = Field(default_factory=LabelConfig)
     aims: AimsConfig | None = None
+    validation: ValidationConfig = Field(default_factory=ValidationConfig)
     finetune: FinetuneConfig = Field(default_factory=FinetuneConfig)
     convergence: ConvergenceConfig = Field(default_factory=ConvergenceConfig)
     hpc: HpcConfig | None = None

@@ -28,7 +28,57 @@ seeds (round 0: slab + adsorbate configs, FM-pre-relaxed, rattled)
   updated model: the natural set. `select.max_per_round` caps it. Picks identical to a start
   structure (HAL collects step 0 when the start is new) are dropped: they are labeled already.
 - **Random picks** (`select.n_random`) are an unbiased sample. The next round's validation
-  error on them is the honest estimate of the current model's error.
+  error on them is the honest estimate of the current model's error. They are drawn from the
+  candidates calm-greedy left; when the natural set takes every candidate, there are none.
+
+## Validation and parity plots
+
+After labeling, the validate stage evaluates the round's driver - which has not seen these
+DFT data - on them: in round 0 the foundation model itself, later the model fine-tuned in the
+previous round (`validation.include_round0`). Energies are compared after removing
+per-element offsets fitted by least squares (the model's energy zero differs from aims's
+all-electron totals by a constant per element). Results: `validation.json` (overall and per
+selection strategy) and, with `validation.parity`, `validate/parity.png` with
+`validate/parity.npz` holding the plotted arrays:
+
+```python
+import numpy as np, matplotlib.pyplot as plt
+d = np.load("runs/round_02/validate/parity.npz")
+plt.scatter(d["f_dft"], d["f_pred"], s=4)      # also e_dft, e_pred (eV/atom), group, f_element
+```
+
+`grace-al validate` does the same for any model and derived properties:
+
+```bash
+grace-al validate config.yaml                          # last model: energy, relative, adsorption
+grace-al validate config.yaml --model fm -p adsorption --references refs.extxyz
+grace-al validate config.yaml --model round:2 -p cohesive --references atoms.extxyz
+```
+
+| property | definition |
+|---|---|
+| `energy` | per-atom energy (per-element offsets removed) and force components |
+| `relative` | E - E(DFT-lowest structure) among structures of the same composition and cell: site preference, coverage ordering; needs no references |
+| `adsorption` | E(slab + adsorbates) - E(clean slab of the same cell) - sum n mu(adsorbate element) |
+| `cohesive` | sum x mu(isolated atom) - E/N, for structures without vacuum |
+
+`mu` comes from `--references`: a structure file with DFT-labeled references (isolated atoms,
+gas molecules), which the model computes too. Without references, adsorption energies use mu
+fitted per method: then only differences between sites and coverages are meaningful. Points
+are labeled `trained on` (the model's training rounds) or `new`. Output:
+`runs/report/validate/<property>_<model>.png` + `.npz`.
+
+## Exporting a model
+
+```bash
+grace-al export config.yaml              # the last fitted round -> export/round_XX/
+```
+
+The folder holds `saved_model/` (ASE: `TPCalculator(model="saved_model")`), `uq/saved_model/`
+(the same with per-atom γ), the checkpoint, the training set, the out-of-sample validation of
+the next round, `MODEL_CARD.md` and `provenance.json`. The model's energies are relative to
+per-element reference energies E0 (listed in the card): model energy + sum of E0 over the
+atoms = DFT total energy.
 
 ## Stopping
 
@@ -66,8 +116,10 @@ Changing how a stage runs (`label.mode`, `explore.backend`, thresholds) is alway
   the seeds (`system.initial.strains`).
 - **τ (`explore.tau`)** is the bias strength and the most important setting: too small and
   nothing is collected, too large and most triggers are rejected (molecules break up,
-  adsorbates desorb). The explore summary warns about both; `explore.calibrate: true` picks
-  τ from short walkers in round 0.
+  adsorbates desorb). After every exploration, the τ advice compares each τ's rejected /
+  (collected + rejected) with `explore.max_reject_ratio` (0.2) and suggests the next value
+  (one step along `explore.calibrate_taus`); `grace-al status` shows it. `explore.calibrate:
+  true` picks τ from short walkers in round 0 by the same criterion.
 - **aims:** k_z = 1 and the dipole correction (aims finds the vacuum level itself) are set for
   slabs automatically; Methfessel-Paxton smearing suits metals.
 
