@@ -265,7 +265,9 @@ class Config(Section):
     @model_validator(mode="after")
     def _finish(self):
         self.home = Path(self.home).expanduser().resolve()
-        resolve = lambda p: p if p is None else (self.home / Path(p).expanduser())
+        # $VARS and ~ expanded, then relative to the config's folder
+        resolve = lambda p: p if p is None else (
+            self.home / Path(os.path.expandvars(str(p))).expanduser())
         self.workdir = resolve(self.workdir)
         self.seeds = resolve(self.seeds)
         if self.system is not None:

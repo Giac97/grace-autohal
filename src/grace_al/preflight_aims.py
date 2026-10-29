@@ -37,8 +37,15 @@ def check_aims(cfg: Config) -> Iterable[Check]:
         yield Check(f"aims binary {b}", _found(b, env.get("PATH")),
                     fix="set aims.bin (or export AIMS_BIN=/path/to/aims.x)", group=g)
         mpirun = shlex.split(cfg.hpc.mpirun if cfg.hpc and cfg.hpc.mpirun else "mpirun")[0]
+        # with site modules and no saved env yet (login node), the job loads the MPI module
+        # itself before aims runs: then only a warning
+        later = bool(cfg.hpc and cfg.hpc.modules) and not env_file(cfg).exists()
         yield Check(f"{mpirun} in aims's PATH", _found(mpirun, env.get("PATH")),
-                    fix="set hpc.mpirun (site profile), or load the MPI module", group=g)
+                    "not in this shell; the job loads hpc.modules first" if later else "",
+                    fix=(f"check: module load {' '.join(cfg.hpc.modules)} && which {mpirun}"
+                         if later and cfg.hpc else
+                         "set hpc.mpirun (site profile), or load the MPI module"),
+                    severity="warning" if later else "error", group=g)
     sd = Path(a.species_dir)
     yield Check(f"species_dir {sd}", sd.is_dir(), fix="fix aims.species_dir", group=g)
     for el in system_elements(cfg):

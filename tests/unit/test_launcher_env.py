@@ -116,3 +116,20 @@ def test_missing_mpirun_is_an_mpi_failure(tmp_path):
     cat, _ = aims_parse.categorize((d / "aims.out").read_text(), (d / "aims.err").read_text())
     assert cat == "mpi"
     assert os.path.exists(d / "aims.out")
+
+
+def test_mpirun_check_is_a_warning_before_the_job(tmp_path, monkeypatch):
+    """Login node with site modules: mpirun comes with the module the job loads."""
+    from grace_al.config.schema import Config
+    from grace_al.preflight_aims import check_aims
+
+    (tmp_path / "species").mkdir()
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    aims = {"species_dir": "species", "bin": "/bin/sh"}
+    c = Config(home=tmp_path, label={"labeler": "aims"}, aims=aims,
+               hpc={"modules": ["mpi/impi"], "mpirun": "mpirun-not-here"})
+    mp = next(x for x in check_aims(c) if "mpirun" in x.name)
+    assert not mp.ok and mp.severity == "warning" and "module load mpi/impi" in mp.fix
+    c = Config(home=tmp_path, label={"labeler": "aims"}, aims=aims,
+               hpc={"mpirun": "mpirun-not-here"})                              # no modules
+    assert next(x for x in check_aims(c) if "mpirun" in x.name).failed

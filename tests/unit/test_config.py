@@ -185,3 +185,12 @@ def test_fingerprint_independent_of_home(tmp_path):
 def test_fingerprint_unknown_section():
     with pytest.raises(KeyError):
         Config(label={"labeler": "manual"}).section_fingerprint("nope")
+
+
+def test_env_vars_in_paths(tmp_path, monkeypatch):
+    monkeypatch.setenv("FHI_HOME", "/opt/fhi")
+    cfg = Config(home=tmp_path, label={"labeler": "aims"},
+                 aims={"species_dir": "$FHI_HOME/species_defaults/defaults_2020/light"},
+                 seeds="~/seeds.extxyz")
+    assert cfg.aims.species_dir == Path("/opt/fhi/species_defaults/defaults_2020/light")
+    assert cfg.seeds == Path.home() / "seeds.extxyz"

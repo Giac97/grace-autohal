@@ -71,11 +71,13 @@ def check_explore_time(cfg: Config) -> Iterable[Check]:
     if ex.calibrate:
         est += (math.ceil(len(ex.calibrate_taus) * ex.calibrate_starts / slots)
                 * ex.calibrate_steps / rate)
+    from grace_al.progress import fmt_duration
+
     msg = (f"{n} walkers x {ex.n_steps} steps, {slots} at a time, ~{rate:g} steps/s: "
-           f"~{est / 3600:.1f} h per round (explore.est_steps_per_s)")
+           f"~{fmt_duration(est)} per round (explore.est_steps_per_s)")
     limit = seconds(cfg.hpc.time) if cfg.hpc else None
     ok = limit is None or est < 0.5 * limit
-    yield Check(f"exploration time estimate: ~{est / 3600:.1f} h", ok,
+    yield Check(f"exploration time estimate: ~{fmt_duration(est)} per round", ok,
                 msg + (f"; more than half of hpc.time {cfg.hpc.time}" if not ok and cfg.hpc
                        else ""),
                 fix="fewer walkers or steps, more walkers_per_gpu, or a longer hpc.time",
